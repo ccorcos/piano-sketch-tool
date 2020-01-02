@@ -3,12 +3,15 @@ import * as _ from "lodash"
 
 // TODO: should probably use positino absolute so they don't overlap weird.
 
-const whiteNoteWidth = 20
-const whiteNoteHeight = 80
-const blackNoteHeight = whiteNoteHeight * 0.6
-const blackNoteWidth = whiteNoteWidth * 0.6
+export const whiteNoteWidth = 20
+export const whiteNoteHeight = 80
+export const blackNoteHeight = whiteNoteHeight * 0.6
+export const blackNoteWidth = whiteNoteWidth * 0.6
 
-function getXPosition(midiNote: number) {
+export const whiteNoteColor = "#7B9EFA"
+export const blackNoteColor = "#5C75B4"
+
+export function getXPosition(midiNote: number) {
 	const offset = Math.floor(midiNote / 12) * whiteNoteWidth * 7
 
 	const note = midiNote % 12
@@ -64,13 +67,41 @@ function getXPosition(midiNote: number) {
 			return xPosition
 		}
 	}
+	throw new Error("Unknown note")
 }
 
-export function Piano(props: { highlight: Set<number> }) {
+export function isBlackNote(midiNote: number) {
+	const note = midiNote % 12
+	switch (note) {
+		// White Notes
+		case 0:
+		case 2:
+		case 4:
+		case 5:
+		case 7:
+		case 9:
+		case 11: {
+			return false
+		}
+		// Black Note
+		default: {
+			return true
+		}
+	}
+}
+
+export function getPianoWidth(midiNote: number) {
+	const position = getXPosition(midiNote)
+	return isBlackNote(midiNote)
+		? position + blackNoteWidth
+		: position + whiteNoteWidth
+}
+
+export function Piano(props: { highlight: Set<number>; size: number }) {
 	return (
 		<div>
 			<div style={{ position: "relative" }}>
-				{_.range(0, 80).map(i => {
+				{_.range(0, props.size).map(i => {
 					const style: React.CSSProperties = {
 						position: "absolute",
 						border: "1px solid black",
@@ -92,7 +123,7 @@ export function Piano(props: { highlight: Set<number> }) {
 							style.height = whiteNoteHeight
 							style.width = whiteNoteWidth
 							if (props.highlight.has(i)) {
-								style.background = "#7B9EFA"
+								style.background = whiteNoteColor
 							}
 						}
 					}
@@ -109,7 +140,7 @@ export function Piano(props: { highlight: Set<number> }) {
 							style.background = "#000000"
 							style.zIndex = 2
 							if (props.highlight.has(i)) {
-								style.background = "#5C75B4"
+								style.background = blackNoteColor
 							}
 						}
 					}
