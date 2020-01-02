@@ -1,6 +1,15 @@
-# TypeScript Boilerplate
+# Piano Sketch Tool
 
-This is a simple setup for getting started building a web application using TypeScript, React, Redux, ImmutableJS, and Glamor.
+- render a piano
+- show key-presses as they map to a piano
+- record notes on a timeline
+- save notes to a file
+- load a file with notes
+- play back notes with the same timing.
+
+## Design
+
+- [Figma](https://www.figma.com/file/QfhKUMaUldqcE5I0DXtq3U/Piano-Sketch-Tool?node-id=0%3A1)
 
 ## Getting Started
 
