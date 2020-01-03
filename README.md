@@ -10,6 +10,10 @@
 - save notes to a file (or URL bar)
 - load a file with notes
 
+## Bugs
+
+- history forward/back navigation
+
 ## Design
 
 - [Figma](https://www.figma.com/file/QfhKUMaUldqcE5I0DXtq3U/Piano-Sketch-Tool?node-id=0%3A1)

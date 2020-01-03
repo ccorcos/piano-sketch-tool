@@ -97,7 +97,7 @@ export class SequencerRenderer {
 	}
 
 	playing = false
-	startPlaying(speed: number = 1) {
+	startPlaying(speed: number = 1, finished?: () => void) {
 		let prev = Date.now()
 		this.playing = true
 		const tick = () => {
@@ -106,6 +106,9 @@ export class SequencerRenderer {
 			}
 			if (this.state.root.parentElement!.scrollTop <= 0) {
 				this.stopPlaying()
+				if (finished) {
+					finished()
+				}
 				return
 			}
 			const dt = Date.now() - prev
@@ -264,9 +267,18 @@ interface SequencePlayerProps {
 
 interface SequencePlayerState {
 	playing: boolean
+	speed: number
 }
 
-export class SequencePlayer extends React.PureComponent<SequencePlayerProps> {
+export class SequencePlayer extends React.PureComponent<
+	SequencePlayerProps,
+	SequencePlayerState
+> {
+	state: SequencePlayerState = {
+		playing: false,
+		speed: 1,
+	}
+
 	private renderer: SequencerRenderer | undefined
 
 	private handleMount = (renderer: SequencerRenderer) => {
@@ -276,21 +288,53 @@ export class SequencePlayer extends React.PureComponent<SequencePlayerProps> {
 
 	private handlePlay = () => {
 		if (this.renderer) {
-			this.renderer.startPlaying(1)
+			this.setState({
+				...this.state,
+				playing: true,
+			})
+			this.renderer.startPlaying(this.state.speed, this.handleStop)
 		}
 	}
 
 	private handleStop = () => {
 		if (this.renderer) {
+			this.setState({
+				...this.state,
+				playing: false,
+			})
 			this.renderer.stopPlaying()
 		}
+	}
+
+	private handleSpeedChange = e => {
+		this.setState({
+			...this.state,
+			speed: e.target.value / 100,
+		})
 	}
 
 	render() {
 		return (
 			<React.Fragment>
-				<button onClick={this.handlePlay}>play</button>
-				<button onClick={this.handleStop}>stop</button>
+				<div style={{ paddingBottom: 4 }}>
+					{this.state.playing ? (
+						<button onClick={this.handleStop}>stop</button>
+					) : (
+						<button onClick={this.handlePlay}>play</button>
+					)}
+
+					<div style={{ width: 80, display: "inline-block" }}>
+						speed: {this.state.speed}
+					</div>
+					<input
+						type="range"
+						min="0"
+						max="300"
+						value={this.state.speed * 100}
+						onChange={this.handleSpeedChange}
+					/>
+				</div>
+
 				<Sequencer onMount={this.handleMount} />
 			</React.Fragment>
 		)
