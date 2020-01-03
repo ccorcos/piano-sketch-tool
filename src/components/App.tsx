@@ -1,16 +1,19 @@
 import * as React from "react"
+import { Piano } from "./Piano"
 import {
-	Piano,
 	getPianoWidth,
+	pianoSize,
+	windowHeight,
+	pixelsPerMillisecond,
 	isBlackNote,
 	whiteNoteWidth,
 	blackNoteWidth,
 	whiteNoteColor,
 	blackNoteColor,
 	getXPosition,
-} from "./Piano"
+} from "./helpers"
+import { ComputerKeyboard } from "./Keyboard"
 
-const pianoSize = 18
 const keyMap = {
 	a: 0,
 	w: 1,
@@ -51,14 +54,15 @@ type AppState =
 export class App extends React.PureComponent<{}, AppState> {
 	state = { keys: new Set(), isRecording: false } as AppState
 
+	source = new ComputerKeyboard()
+
 	componentWillMount() {
-		window.addEventListener("keydown", this.handleKeyDown)
-		window.addEventListener("keyup", this.handleKeyUp)
+		this.source.start()
+		this.source.addListener(this.handleMidiNote)
 	}
 
 	componentWillUnmount() {
-		window.removeEventListener("keydown", this.handleKeyDown)
-		window.removeEventListener("keyup", this.handleKeyUp)
+		this.source.stop()
 	}
 
 	render() {
@@ -78,9 +82,6 @@ export class App extends React.PureComponent<{}, AppState> {
 
 	private renderTraces() {
 		const traces: Array<JSX.Element> = []
-
-		const height = 200
-		const pixelsPerMillisecond = height / 2500
 
 		if (!this.state.isRecording) {
 			return false
@@ -126,7 +127,7 @@ export class App extends React.PureComponent<{}, AppState> {
 			<div
 				style={{
 					overflow: "auto",
-					height: height,
+					height: windowHeight,
 					border: "1px solid black",
 					boxSizing: "border-box",
 					width: getPianoWidth(pianoSize - 1),
@@ -152,40 +153,23 @@ export class App extends React.PureComponent<{}, AppState> {
 	// Events.
 	// ==============================================================
 
-	private handleKeyDown = (event: KeyboardEvent) => {
-		if (event.key in keyMap) {
-			const newKeys = new Set(this.state.keys)
-			const midiNote = keyMap[event.key]
+	private handleMidiNote = (on: boolean, midiNote: number) => {
+		const newKeys = new Set(this.state.keys)
+		if (on) {
 			newKeys.add(midiNote)
-			this.setState({
-				...this.state,
-				keys: newKeys,
-			})
-			if (this.state.isRecording) {
-				this.state.notes.push({
-					type: "down",
-					midiNote,
-					time: Date.now() - this.state.startTime,
-				})
-			}
-		}
-	}
-	private handleKeyUp = (event: KeyboardEvent) => {
-		if (event.key in keyMap) {
-			const newKeys = new Set(this.state.keys)
-			const midiNote = keyMap[event.key]
+		} else {
 			newKeys.delete(midiNote)
-			this.setState({
-				...this.state,
-				keys: newKeys,
+		}
+		this.setState({
+			...this.state,
+			keys: newKeys,
+		})
+		if (this.state.isRecording) {
+			this.state.notes.push({
+				type: on ? "down" : "up",
+				midiNote,
+				time: Date.now() - this.state.startTime,
 			})
-			if (this.state.isRecording) {
-				this.state.notes.push({
-					type: "up",
-					midiNote,
-					time: Date.now() - this.state.startTime,
-				})
-			}
 		}
 	}
 

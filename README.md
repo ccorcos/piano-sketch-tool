@@ -1,11 +1,12 @@
 # Piano Sketch Tool
 
-- render a piano
-- show key-presses as they map to a piano
-- record notes on a timeline
+- better rendering perf
+	- RAF out of state lifecycle
+	- use transform instead of setting height
 - save notes to a file
 - load a file with notes
 - play back notes with the same timing.
+- wait for you to play all the notes before continuing.
 
 ## Design
 
