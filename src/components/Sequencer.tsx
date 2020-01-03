@@ -45,7 +45,7 @@ export class SequencerRenderer {
 
 	constructor(div: HTMLDivElement) {
 		div.style.position = "absolute"
-		div.style.bottom = "0px"
+		div.style.top = "0px"
 		div.style.left = "0px"
 		div.style.right = "0px"
 		div.style.height = "0px"
@@ -82,15 +82,10 @@ export class SequencerRenderer {
 		for (const event of events) {
 			this.handleEvent(event)
 		}
-		const timeMs = _.max(this.state.events.map(e => e.timeMs)) || 0
-		this.state.root.style.height = `${timeMs * pixelsPerMillisecond}px`
+		const minMs = _.min(this.state.events.map(e => e.timeMs)) || 0
+		const maxMs = _.max(this.state.events.map(e => e.timeMs)) || 0
+		this.state.root.style.height = `${(maxMs + minMs) * pixelsPerMillisecond}px`
 		this.state.root.style.position = "relative"
-
-		for (const note of this.state.completedNotes) {
-			delete note.elm.style.top
-			note.elm.style.top = null as any
-			note.elm.style.bottom = `${note.startMs * pixelsPerMillisecond}px`
-		}
 	}
 
 	handleEvent(event: MidiEvent) {
@@ -110,8 +105,8 @@ export class SequencerRenderer {
 			div.style.position = "absolute"
 			const xPos = getXPosition(midiNote)
 			div.style.left = `${xPos}px`
-			div.style.top = `${timeMs * pixelsPerMillisecond}px`
-			div.style.bottom = "0px"
+			div.style.bottom = `${timeMs * pixelsPerMillisecond}px`
+			div.style.top = "0px"
 
 			div.style.width = isBlackNote(midiNote)
 				? `${blackNoteWidth}px`
@@ -133,7 +128,7 @@ export class SequencerRenderer {
 			)
 			if (i !== -1) {
 				const [note] = this.state.incompleteNotes.splice(i, 1)
-				delete note.elm.style.bottom
+				note.elm.style.top = null as any
 				note.elm.style.height = `${(timeMs - note.startMs) *
 					pixelsPerMillisecond}px`
 				this.state.completedNotes.push({ ...note, endMs: timeMs })
@@ -221,8 +216,8 @@ export class SequenceRecorder extends React.PureComponent<
 	render() {
 		return (
 			<React.Fragment>
-				<button onClick={this.handleStop}>stop</button>
 				<Sequencer onMount={this.handleMount} />
+				<button onClick={this.handleStop}>stop</button>
 			</React.Fragment>
 		)
 	}

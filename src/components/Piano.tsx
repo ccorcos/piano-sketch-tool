@@ -9,59 +9,64 @@ import {
 	whiteNoteColor,
 	blackNoteColor,
 	getXPosition,
+	getPianoWidth,
 } from "./helpers"
 
 export function Piano(props: { highlight: Set<number>; size: number }) {
 	return (
-		<div>
-			<div style={{ position: "relative" }}>
-				{_.range(0, props.size).map(i => {
-					const style: React.CSSProperties = {
-						position: "absolute",
-						border: "1px solid black",
-						boxSizing: "border-box",
-						top: 0,
-						left: getXPosition(i),
-					}
+		<div
+			style={{
+				position: "relative",
+				height: whiteNoteHeight,
+				width: getPianoWidth(props.size),
+			}}
+		>
+			{_.range(0, props.size).map(i => {
+				const style: React.CSSProperties = {
+					position: "absolute",
+					border: "1px solid black",
+					boxSizing: "border-box",
+					top: 0,
+					left: getXPosition(i),
+				}
 
-					const note = i % 12
-					switch (note) {
-						// White Notes
-						case 0:
-						case 2:
-						case 4:
-						case 5:
-						case 7:
-						case 9:
-						case 11: {
-							style.height = whiteNoteHeight
-							style.width = whiteNoteWidth
-							if (props.highlight.has(i)) {
-								style.background = whiteNoteColor
-							}
+				const note = i % 12
+				switch (note) {
+					// White Notes
+					case 0:
+					case 2:
+					case 4:
+					case 5:
+					case 7:
+					case 9:
+					case 11: {
+						style.height = whiteNoteHeight
+						style.width = whiteNoteWidth
+						if (props.highlight.has(i)) {
+							style.background = whiteNoteColor
 						}
 					}
+				}
 
-					switch (note) {
-						// Black Notes
-						case 1:
-						case 3:
-						case 6:
-						case 8:
-						case 10: {
-							style.height = blackNoteHeight
-							style.width = blackNoteWidth
-							style.background = "#000000"
-							style.zIndex = 2
-							if (props.highlight.has(i)) {
-								style.background = blackNoteColor
-							}
+				switch (note) {
+					// Black Notes
+					case 1:
+					case 3:
+					case 6:
+					case 8:
+					case 10: {
+						style.height = blackNoteHeight
+						style.width = blackNoteWidth
+						style.background = "#000000"
+						style.zIndex = 2
+						if (props.highlight.has(i)) {
+							style.background = blackNoteColor
 						}
 					}
+				}
 
-					return <div key={i} style={style} />
-				})}
-			</div>
+				return <div key={i} style={style} />
+			})}
 		</div>
 	)
 }

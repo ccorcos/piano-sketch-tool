@@ -76,11 +76,11 @@ export class App extends React.PureComponent<{}, AppState> {
 		} else if (state.type === "recording") {
 			return (
 				<div>
+					<Piano highlight={state.keys} size={pianoSize} />
 					<SequenceRecorder
 						source={this.source}
 						handleStop={this.handleStopRecording}
 					/>
-					<Piano highlight={state.keys} size={pianoSize} />
 				</div>
 			)
 		} else {

@@ -1,6 +1,7 @@
 # Piano Sketch Tool
 
-- save notes to a file
+- record with keyboard at top, play with keyboard at bottom.
+- save notes to a file (or URL bar)
 - load a file with notes
 - play back notes with the same timing.
 - wait for you to play all the notes before continuing.
