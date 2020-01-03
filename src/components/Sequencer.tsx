@@ -77,6 +77,14 @@ export class SequencerRenderer {
 		const { keyOn, midiNote, timeMs } = event
 
 		if (keyOn) {
+			const i = this.state.incompleteNotes.findIndex(
+				note => note.midiNote === midiNote
+			)
+			if (i !== -1) {
+				// Handle key-repeat
+				return
+			}
+
 			const div = document.createElement("div")
 			div.style.position = "absolute"
 			const xPos = getXPosition(midiNote)
@@ -104,8 +112,12 @@ export class SequencerRenderer {
 			)
 			if (i !== -1) {
 				const [note] = this.state.incompleteNotes.splice(i, 1)
-				note.elm.style.bottom = `${timeMs * pixelsPerMillisecond}px`
+				delete note.elm.style.bottom
+				note.elm.style.height = `${(timeMs - note.startMs) *
+					pixelsPerMillisecond}px`
 				this.state.completedNotes.push({ ...note, endMs: timeMs })
+			} else {
+				console.log("missing!")
 			}
 		}
 	}
@@ -152,7 +164,6 @@ export class SequenceRecorder extends React.PureComponent<
 	render() {
 		return (
 			<div
-				ref={this.handleRef}
 				style={{
 					overflow: "auto",
 					height: windowHeight,
@@ -161,7 +172,9 @@ export class SequenceRecorder extends React.PureComponent<
 					width: getPianoWidth(pianoSize - 1),
 					position: "relative",
 				}}
-			></div>
+			>
+				<div ref={this.handleRef}></div>
+			</div>
 		)
 	}
 }
