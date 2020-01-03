@@ -90,7 +90,7 @@ export function isBlackNote(midiNote: number) {
 }
 
 export function getPianoWidth(midiNote: number) {
-	const position = getXPosition(midiNote)
+	const position = getXPosition(midiNote - 1)
 	return isBlackNote(midiNote)
 		? position + blackNoteWidth
 		: position + whiteNoteWidth

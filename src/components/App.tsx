@@ -1,15 +1,13 @@
 import * as React from "react"
 import { Piano } from "./Piano"
-import { pianoSize } from "./helpers"
+import { pianoSize, getPianoWidth } from "./helpers"
 import { WebMidiSource } from "./MidiSource"
 import { SequenceRecorder, MidiEvent, SequencePlayer } from "./Sequencer"
 import { clearSongUrl, getSongUrl } from "./routeHelpers"
 
+const border = "1px solid #B8B8B8"
+
 type AppState =
-	| {
-			type: "start"
-			keys: Set<number>
-	  }
 	| {
 			type: "recording"
 			keys: Set<number>
@@ -21,7 +19,7 @@ type AppState =
 	  }
 
 export class App extends React.PureComponent<{}, AppState> {
-	state: AppState = { type: "start" as const, keys: new Set<number>() }
+	state: AppState = { type: "recording" as const, keys: new Set<number>() }
 	source = new WebMidiSource()
 
 	constructor(props) {
@@ -45,28 +43,74 @@ export class App extends React.PureComponent<{}, AppState> {
 		this.source.stop()
 	}
 
+	renderTopbar() {
+		return (
+			<div
+				style={{ paddingBottom: 10, borderBottom: border, marginBottom: "2em" }}
+			>
+				<button style={{ marginRight: 4 }}>New Sketch (N)</button>
+				<button style={{ marginRight: 4 }}>Open Sketch (O)</button>
+			</div>
+		)
+	}
+
 	render() {
 		const state = this.state
-		if (state.type === "start") {
+		if (state.type === "recording") {
 			return (
-				<div>
-					<button onClick={this.handleStartRecording}>record</button>
-					<Piano highlight={state.keys} size={pianoSize} />
-				</div>
-			)
-		} else if (state.type === "recording") {
-			return (
-				<div>
-					<Piano highlight={state.keys} size={pianoSize} />
+				<div style={{ margin: "2em auto", width: getPianoWidth(pianoSize) }}>
 					<SequenceRecorder
 						source={this.source}
-						handleStop={this.handleStopRecording}
+						render={({ recording, start, stop, sequencer }) => (
+							<div>
+								{this.renderTopbar()}
+
+								<div>
+									<input
+										style={{ marginBottom: 4 }}
+										placeholder="Untitled Sketch"
+									></input>
+								</div>
+								{recording ? (
+									<button
+										style={{ marginRight: 4, marginBottom: 16 }}
+										onClick={() => {
+											const events = stop()
+											this.setState({
+												...this.state,
+												type: "loaded",
+												events,
+											})
+										}}
+									>
+										Stop (SPACE)
+									</button>
+								) : (
+									<button
+										style={{ marginRight: 4, marginBottom: 16 }}
+										onClick={() => {
+											const events = start()
+											this.setState({
+												...this.state,
+												type: "recording",
+											})
+										}}
+									>
+										Record (SPACE)
+									</button>
+								)}
+
+								<Piano highlight={state.keys} size={pianoSize} />
+								{sequencer}
+							</div>
+						)}
 					/>
 				</div>
 			)
 		} else {
 			return (
-				<div>
+				<div style={{ margin: "2em auto", width: getPianoWidth(pianoSize) }}>
+					{this.renderTopbar()}
 					<SequencePlayer events={state.events} onClear={this.handleReset} />
 					<Piano highlight={state.keys} size={pianoSize} />
 				</div>
@@ -80,21 +124,6 @@ export class App extends React.PureComponent<{}, AppState> {
 
 	private handleReset = () => {
 		clearSongUrl()
-		this.setState({
-			...this.state,
-			type: "start",
-		})
-	}
-
-	private handleStopRecording = (events: Array<MidiEvent>) => {
-		this.setState({
-			...this.state,
-			type: "loaded",
-			events,
-		})
-	}
-
-	private handleStartRecording = () => {
 		this.setState({
 			...this.state,
 			type: "recording",

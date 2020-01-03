@@ -4,7 +4,6 @@ The goal of this project is to create a tool for recording piano ideas as well a
 
 ## Features
 
-- accept midi input
 - play back notes with the same timing.
 	- halt feature togglable -- wait for you to play all the notes before continuing.
 - ui stuff

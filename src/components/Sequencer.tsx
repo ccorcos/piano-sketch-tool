@@ -210,20 +210,32 @@ export class Sequencer extends React.PureComponent<SequencerProps> {
 
 interface SequenceRecorderProps {
 	source: MidiSource
-	handleStop: (events: Array<MidiEvent>) => void
+	render: (props: {
+		recording: boolean
+		start: () => void
+		stop: () => Array<MidiEvent>
+		sequencer: JSX.Element
+	}) => React.ReactNode
+}
+
+interface SequenceRecorderState {
+	recording: boolean
 }
 
 export class SequenceRecorder extends React.PureComponent<
-	SequenceRecorderProps
+	SequenceRecorderProps,
+	SequenceRecorderState
 > {
+	state: SequenceRecorderState = { recording: false }
+
 	private renderer: SequencerRenderer | undefined
 
 	private handleMount = (renderer: SequencerRenderer) => {
 		this.renderer = renderer
-		this.handleStart()
 	}
 
 	private handleStart = () => {
+		this.setState({ recording: true })
 		if (this.renderer) {
 			this.props.source.addListener(this.handleMidiNote)
 			this.renderer.startRecording(Date.now())
@@ -231,11 +243,13 @@ export class SequenceRecorder extends React.PureComponent<
 	}
 
 	private handleStop = () => {
+		this.setState({ recording: false })
 		this.props.source.removeListener(this.handleMidiNote)
 		if (this.renderer) {
 			this.renderer.stopRecording()
-			this.props.handleStop(this.renderer.state.events)
+			return this.renderer.state.events
 		}
+		return []
 	}
 
 	private handleMidiNote = (keyOn: boolean, midiNote: number) => {
@@ -249,12 +263,12 @@ export class SequenceRecorder extends React.PureComponent<
 	}
 
 	render() {
-		return (
-			<React.Fragment>
-				<Sequencer onMount={this.handleMount} />
-				<button onClick={this.handleStop}>stop</button>
-			</React.Fragment>
-		)
+		return this.props.render({
+			recording: this.state.recording,
+			start: this.handleStart,
+			stop: this.handleStop,
+			sequencer: <Sequencer onMount={this.handleMount} />,
+		})
 	}
 }
 
