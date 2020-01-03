@@ -1,8 +1,9 @@
-# Piano Sketch Tool
+# Piano Sketch Tool [Demo](https://ccorcos.github.io/piano-sketch-tool)
 
 - play back notes with the same timing.
 	- speed adjuster
 	- halt feature togglable
+- url encoding that's more compressed.
 - wait for you to play all the notes before continuing.
 
 - save to url bar
@@ -26,12 +27,4 @@ cd project
 git remote remove origin
 npm install
 npm start
-```
-
-An in order to be able to deploy this using Github pages, you'll need to create an push an initial branch to Github:
-
-```sh
-git checkout -b gh-pages
-git push origin gh-pages
-git checkout master
 ```
