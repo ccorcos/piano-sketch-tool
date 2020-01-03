@@ -57,18 +57,18 @@ export class SequencerRenderer {
 		}
 	}
 
-	stopped = false
+	recording = false
 
-	stop() {
-		this.stopped = true
+	stopRecording() {
+		this.recording = false
 	}
 
 	startMs: number | undefined
-	start(startMs: number) {
+	startRecording(startMs: number) {
 		this.startMs = startMs
-		this.stopped = false
+		this.recording = true
 		const tick = () => {
-			if (this.stopped) {
+			if (!this.recording) {
 				return
 			}
 			const timeMs = Date.now() - startMs
@@ -88,6 +88,39 @@ export class SequencerRenderer {
 		this.state.root.style.position = "relative"
 		this.state.root.style.paddingTop = `${sequencerHeight}px`
 		this.state.root.parentElement!.scrollTop = height
+
+		history.pushState(
+			{},
+			"",
+			"/?song=" + encodeURIComponent(JSON.stringify(events))
+		)
+	}
+
+	playing = false
+	startPlaying(speed: number = 1) {
+		let prev = Date.now()
+		this.playing = true
+		const tick = () => {
+			if (!this.playing) {
+				return
+			}
+			if (this.state.root.parentElement!.scrollTop <= 0) {
+				this.stopPlaying()
+				return
+			}
+			const dt = Date.now() - prev
+			prev = Date.now()
+
+			this.state.root.parentElement!.scrollTop =
+				this.state.root.parentElement!.scrollTop -
+				pixelsPerMillisecond * dt * speed
+			requestAnimationFrame(tick)
+		}
+		requestAnimationFrame(tick)
+	}
+
+	stopPlaying() {
+		this.playing = false
 	}
 
 	handleEvent(event: MidiEvent) {
@@ -193,14 +226,14 @@ export class SequenceRecorder extends React.PureComponent<
 	private handleStart = () => {
 		if (this.renderer) {
 			this.props.source.addListener(this.handleMidiNote)
-			this.renderer.start(Date.now())
+			this.renderer.startRecording(Date.now())
 		}
 	}
 
 	private handleStop = () => {
 		this.props.source.removeListener(this.handleMidiNote)
 		if (this.renderer) {
-			this.renderer.stop()
+			this.renderer.stopRecording()
 			this.props.handleStop(this.renderer.state.events)
 		}
 	}
@@ -229,6 +262,10 @@ interface SequencePlayerProps {
 	events: Array<MidiEvent>
 }
 
+interface SequencePlayerState {
+	playing: boolean
+}
+
 export class SequencePlayer extends React.PureComponent<SequencePlayerProps> {
 	private renderer: SequencerRenderer | undefined
 
@@ -237,10 +274,23 @@ export class SequencePlayer extends React.PureComponent<SequencePlayerProps> {
 		this.renderer.load(this.props.events)
 	}
 
+	private handlePlay = () => {
+		if (this.renderer) {
+			this.renderer.startPlaying(1)
+		}
+	}
+
+	private handleStop = () => {
+		if (this.renderer) {
+			this.renderer.stopPlaying()
+		}
+	}
+
 	render() {
 		return (
 			<React.Fragment>
-				<button>play?</button>
+				<button onClick={this.handlePlay}>play</button>
+				<button onClick={this.handleStop}>stop</button>
 				<Sequencer onMount={this.handleMount} />
 			</React.Fragment>
 		)

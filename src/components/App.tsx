@@ -14,6 +14,7 @@ import {
 } from "./helpers"
 import { ComputerMidiSource } from "./MidiSource"
 import { SequenceRecorder, MidiEvent, SequencePlayer } from "./Sequencer"
+import * as url from "url"
 
 const keyMap = {
 	a: 0,
@@ -54,6 +55,19 @@ type AppState =
 export class App extends React.PureComponent<{}, AppState> {
 	state: AppState = { type: "start" as const, keys: new Set<number>() }
 	source = new ComputerMidiSource()
+
+	constructor(props) {
+		super(props)
+		const parsed = url.parse(location.href, true)
+		if (parsed.query.song) {
+			const events = JSON.parse(decodeURIComponent(parsed.query.song as string))
+			this.state = {
+				...this.state,
+				type: "loaded",
+				events: events,
+			}
+		}
+	}
 
 	componentWillMount() {
 		this.source.start()
