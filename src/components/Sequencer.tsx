@@ -56,6 +56,24 @@ export class SequencerRenderer {
 			incompleteNotes: [],
 			events: [],
 		}
+
+		// Create the guides
+		for (let i = 0; i < pianoSize; i++) {
+			if (i % 12 === 0 || i % 12 === 5) {
+				const makeElm = () => {
+					const elm = document.createElement("div")
+					elm.style.position = "absolute"
+					elm.style.top = "0px"
+					elm.style.bottom = "0px"
+					elm.style.width = "2px"
+					elm.style.background = "#d0d0d0"
+					elm.style.left = `${getXPosition(i) - 2}px`
+					return elm
+				}
+				div.appendChild(makeElm())
+				div.parentElement!.appendChild(makeElm())
+			}
+		}
 	}
 
 	recording = false
@@ -202,7 +220,7 @@ export class Sequencer extends React.PureComponent<SequencerProps> {
 						height: sequencerHeight,
 						border: "1px solid black",
 						boxSizing: "border-box",
-						width: getPianoWidth(pianoSize - 1),
+						width: getPianoWidth(pianoSize),
 						position: "relative",
 					}}
 				>

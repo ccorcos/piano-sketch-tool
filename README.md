@@ -5,11 +5,10 @@ The goal of this project is to create a tool for recording piano ideas as well a
 ## Features
 
 - ui stuff
-	- topbar actions
-	- time elapsed
-	- edit title
-	- date of recording
 	- piano guides in the ui.
+	- time elapsed
+	- title
+	- date of recording
 	- indication if you hit the right note at the right time.
 
 - play back notes with the same timing.
