@@ -53,6 +53,13 @@ export class App extends React.PureComponent<{}, AppState> {
 					New Sketch (N)
 				</button>
 				{/* <button style={{ marginRight: 4 }}>Open Sketch (O)</button> */}
+
+				<a
+					style={{ fontSize: 14, float: "right" }}
+					href="https://www.github.com/ccorcos/piano-sketch-tool"
+				>
+					source code
+				</a>
 				<KeyboardShorcuts
 					keydown={key => {
 						if (key === "n") {
@@ -83,7 +90,7 @@ export class App extends React.PureComponent<{}, AppState> {
 								})
 							}
 							const handleRecord = () => {
-								const events = start()
+								start()
 								this.setState({
 									...this.state,
 									type: "recording",
@@ -160,7 +167,7 @@ export class App extends React.PureComponent<{}, AppState> {
 											style={{ marginBottom: 4 }}
 											placeholder="Untitled Sketch"
 										></input>
-										<span style={{ marginLeft: 4, fontSize: 12 }}>
+										<span style={{ marginLeft: 4, fontSize: 14 }}>
 											2020-01-01 16:42
 										</span>
 									</div> */}
@@ -196,7 +203,7 @@ export class App extends React.PureComponent<{}, AppState> {
 									/>
 
 									<div style={{ display: "inline-flex" }}>
-										<span style={{ margin: "0 4px", fontSize: 12 }}>
+										<span style={{ margin: "0 4px", fontSize: 14 }}>
 											Speed:
 										</span>
 										<input
@@ -206,7 +213,7 @@ export class App extends React.PureComponent<{}, AppState> {
 											value={speed * 100}
 											onChange={(e: any) => setSpeed(e.target.value / 100)}
 										/>
-										<span style={{ margin: "0 4px", fontSize: 12 }}>
+										<span style={{ margin: "0 4px", fontSize: 14 }}>
 											{speed}
 										</span>
 									</div>
