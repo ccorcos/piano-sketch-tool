@@ -21,7 +21,7 @@ const keyMap = {
 
 type MidiNodeListener = (on: boolean, midiNote: number) => void
 
-export class ComputerKeyboard {
+export class ComputerMidiSource {
 	listeners: Set<MidiNodeListener> = new Set()
 	addListener(fn: MidiNodeListener) {
 		this.listeners.add(fn)

@@ -12,7 +12,7 @@ import {
 	blackNoteColor,
 	getXPosition,
 } from "./helpers"
-import { ComputerKeyboard } from "./Keyboard"
+import { ComputerMidiSource } from "./MidiSource"
 
 const keyMap = {
 	a: 0,
@@ -54,7 +54,7 @@ type AppState =
 export class App extends React.PureComponent<{}, AppState> {
 	state = { keys: new Set(), isRecording: false } as AppState
 
-	source = new ComputerKeyboard()
+	source = new ComputerMidiSource()
 
 	componentWillMount() {
 		this.source.start()
