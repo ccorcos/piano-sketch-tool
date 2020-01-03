@@ -4,15 +4,13 @@ The goal of this project is to create a tool for recording piano ideas as well a
 
 ## Features
 
+- halt feature togglable -- wait for you to play all the notes before continuing.
+
 - ui stuff
-	- piano guides in the ui.
 	- time elapsed
 	- title
 	- date of recording
 	- indication if you hit the right note at the right time.
-
-- play back notes with the same timing.
-	- halt feature togglable -- wait for you to play all the notes before continuing.
 
 - save notes to a file
 - load a file with notes
