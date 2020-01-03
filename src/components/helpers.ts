@@ -1,16 +1,13 @@
-export const pianoSize = 72
 export const sequencerHeight = 400
 export const pixelsPerMillisecond = sequencerHeight / 2500
-
 export const whiteNoteWidth = 20
 export const whiteNoteHeight = 80
 export const blackNoteHeight = whiteNoteHeight * 0.6
 export const blackNoteWidth = whiteNoteWidth * 0.6
-
 export const whiteNoteColor = "#7B9EFA"
 export const blackNoteColor = "#5C75B4"
 
-export function getXPosition(midiNote: number) {
+function getAbsoluteXPosition(midiNote: number) {
 	const offset = Math.floor(midiNote / 12) * whiteNoteWidth * 7
 
 	const note = midiNote % 12
@@ -89,9 +86,16 @@ export function isBlackNote(midiNote: number) {
 	}
 }
 
-export function getPianoWidth(midiNote: number) {
-	const position = getXPosition(midiNote - 1)
-	return isBlackNote(midiNote)
-		? position + blackNoteWidth
-		: position + whiteNoteWidth
+// 88 keys
+// 21 - 108
+
+export const midiRange = { start: 21, end: 108 }
+const startOffset = getAbsoluteXPosition(midiRange.start)
+
+export function getXPosition(midiNote: number) {
+	return getAbsoluteXPosition(midiNote) - startOffset
 }
+
+export const pianoWidth =
+	getXPosition(midiRange.end) +
+	(isBlackNote(midiRange.end) ? blackNoteWidth : whiteNoteWidth)

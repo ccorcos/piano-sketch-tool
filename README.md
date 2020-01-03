@@ -1,11 +1,16 @@
-# Piano Sketch Tool [[Live Demo]](https://ccorcos.github.io/piano-sketch-tool)
+# Piano Sketch Tool
 
 The goal of this project is to create a tool for recording, learning, and sharing piano songs.
+
+- [Check out the Live Demo](https://ccorcos.github.io/piano-sketch-tool)
+- [Check out the Gallery](https://github.com/ccorcos/piano-sketch-tool/blob/master/GALLERY.md)
 
 ## To-Do
 
 - Features
 	- halt feature togglable -- wait for you to play all the notes before continuing.
+	- trim the beginning of the song to one second of lead-in.
+	- play the song aloud do you can hear it.
 
 	- ui stuff
 		- time elapsed

@@ -9,8 +9,8 @@ import {
 	whiteNoteColor,
 	pixelsPerMillisecond,
 	sequencerHeight,
-	getPianoWidth,
-	pianoSize,
+	pianoWidth,
+	midiRange,
 } from "./helpers"
 import { MidiSource } from "./MidiSource"
 import { setSongUrl } from "./routeHelpers"
@@ -58,7 +58,7 @@ export class SequencerRenderer {
 		}
 
 		// Create the guides
-		for (let i = 0; i < pianoSize; i++) {
+		for (let i = midiRange.start; i < midiRange.end; i++) {
 			if (i % 12 === 0 || i % 12 === 5) {
 				const makeElm = () => {
 					const elm = document.createElement("div")
@@ -220,7 +220,7 @@ export class Sequencer extends React.PureComponent<SequencerProps> {
 						height: sequencerHeight,
 						border: "1px solid black",
 						boxSizing: "border-box",
-						width: getPianoWidth(pianoSize),
+						width: pianoWidth,
 						position: "relative",
 					}}
 				>

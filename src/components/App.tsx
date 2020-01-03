@@ -1,6 +1,6 @@
 import * as React from "react"
 import { Piano } from "./Piano"
-import { pianoSize, getPianoWidth } from "./helpers"
+import { pianoWidth } from "./helpers"
 import { WebMidiSource } from "./MidiSource"
 import { SequenceRecorder, MidiEvent, SequencePlayer } from "./Sequencer"
 import { clearSongUrl, getSongUrl } from "./routeHelpers"
@@ -77,7 +77,7 @@ export class App extends React.PureComponent<{}, AppState> {
 		const state = this.state
 		if (state.type === "recording") {
 			return (
-				<div style={{ margin: "2em auto", width: getPianoWidth(pianoSize) }}>
+				<div style={{ margin: "2em auto", width: pianoWidth }}>
 					<SequenceRecorder
 						source={this.source}
 						render={({ recording, start, stop, sequencer }) => {
@@ -143,7 +143,7 @@ export class App extends React.PureComponent<{}, AppState> {
 										/>
 									</div>
 
-									<Piano highlight={state.keys} size={pianoSize} />
+									<Piano highlight={state.keys} />
 									{sequencer}
 								</div>
 							)
@@ -153,7 +153,7 @@ export class App extends React.PureComponent<{}, AppState> {
 			)
 		} else {
 			return (
-				<div style={{ margin: "2em auto", width: getPianoWidth(pianoSize) }}>
+				<div style={{ margin: "2em auto", width: pianoWidth }}>
 					{this.renderTopbar()}
 					<SequencePlayer
 						events={state.events}
@@ -229,7 +229,7 @@ export class App extends React.PureComponent<{}, AppState> {
 									</div>
 								</div>
 								{sequencer}
-								<Piano highlight={state.keys} size={pianoSize} />
+								<Piano highlight={state.keys} />
 							</div>
 						)}
 					/>

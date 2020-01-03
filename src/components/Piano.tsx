@@ -9,19 +9,20 @@ import {
 	whiteNoteColor,
 	blackNoteColor,
 	getXPosition,
-	getPianoWidth,
+	pianoWidth,
+	midiRange,
 } from "./helpers"
 
-export function Piano(props: { highlight: Set<number>; size: number }) {
+export function Piano(props: { highlight: Set<number> }) {
 	return (
 		<div
 			style={{
 				position: "relative",
 				height: whiteNoteHeight,
-				width: getPianoWidth(props.size),
+				width: pianoWidth,
 			}}
 		>
-			{_.range(0, props.size).map(i => {
+			{_.range(midiRange.start, midiRange.end + 1).map(i => {
 				const style: React.CSSProperties = {
 					position: "absolute",
 					border: "1px solid black",
