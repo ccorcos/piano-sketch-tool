@@ -65,40 +65,43 @@ export class App extends React.PureComponent<{}, AppState> {
 							<div>
 								{this.renderTopbar()}
 
-								<div>
-									<input
-										style={{ marginBottom: 4 }}
-										placeholder="Untitled Sketch"
-									></input>
+								<div style={{ marginBottom: 12 }}>
+									<div>
+										<input
+											style={{ marginBottom: 4 }}
+											placeholder="Untitled Sketch"
+										></input>
+									</div>
+
+									{recording ? (
+										<button
+											style={{ marginRight: 4, marginBottom: 16 }}
+											onClick={() => {
+												const events = stop()
+												this.setState({
+													...this.state,
+													type: "loaded",
+													events,
+												})
+											}}
+										>
+											Stop (SPACE)
+										</button>
+									) : (
+										<button
+											style={{ marginRight: 4, marginBottom: 16 }}
+											onClick={() => {
+												const events = start()
+												this.setState({
+													...this.state,
+													type: "recording",
+												})
+											}}
+										>
+											Record (SPACE)
+										</button>
+									)}
 								</div>
-								{recording ? (
-									<button
-										style={{ marginRight: 4, marginBottom: 16 }}
-										onClick={() => {
-											const events = stop()
-											this.setState({
-												...this.state,
-												type: "loaded",
-												events,
-											})
-										}}
-									>
-										Stop (SPACE)
-									</button>
-								) : (
-									<button
-										style={{ marginRight: 4, marginBottom: 16 }}
-										onClick={() => {
-											const events = start()
-											this.setState({
-												...this.state,
-												type: "recording",
-											})
-										}}
-									>
-										Record (SPACE)
-									</button>
-								)}
 
 								<Piano highlight={state.keys} size={pianoSize} />
 								{sequencer}
@@ -111,8 +114,58 @@ export class App extends React.PureComponent<{}, AppState> {
 			return (
 				<div style={{ margin: "2em auto", width: getPianoWidth(pianoSize) }}>
 					{this.renderTopbar()}
-					<SequencePlayer events={state.events} onClear={this.handleReset} />
-					<Piano highlight={state.keys} size={pianoSize} />
+					<SequencePlayer
+						events={state.events}
+						render={({
+							playing,
+							play,
+							pause,
+							restart,
+							sequencer,
+							speed,
+							setSpeed,
+						}) => (
+							<div>
+								<div style={{ marginBottom: 12 }}>
+									<div>
+										<input
+											style={{ marginBottom: 4 }}
+											placeholder="Untitled Sketch"
+										></input>
+										<span style={{ marginLeft: 4, fontSize: 12 }}>
+											2020-01-01 16:42
+										</span>
+									</div>
+
+									{playing ? (
+										<button onClick={pause}>Pause (SPACE)</button>
+									) : (
+										<button onClick={play}>Play (SPACE)</button>
+									)}
+
+									<button onClick={restart}>Restart (ENTER)</button>
+
+									<div style={{ display: "inline-flex" }}>
+										<span style={{ margin: "0 4px", fontSize: 12 }}>
+											Speed:
+										</span>
+										<input
+											type="range"
+											min="0"
+											max="300"
+											value={speed * 100}
+											onChange={(e: any) => setSpeed(e.target.value / 100)}
+										/>
+										<span style={{ margin: "0 4px", fontSize: 12 }}>
+											{speed}
+										</span>
+									</div>
+								</div>
+								{sequencer}
+								<Piano highlight={state.keys} size={pianoSize} />
+							</div>
+						)}
+					/>
 				</div>
 			)
 		}

@@ -93,8 +93,13 @@ export class SequencerRenderer {
 		setSongUrl(events)
 	}
 
+	resetScroll() {
+		this.state.root.parentElement!.scrollTop = this.state.root.parentElement!.scrollHeight
+	}
+
 	playing = false
-	startPlaying(speed: number = 1, finished?: () => void) {
+	speed = 1
+	startPlaying(finished?: () => void) {
 		let prev = Date.now()
 		this.playing = true
 		const tick = () => {
@@ -113,7 +118,7 @@ export class SequencerRenderer {
 
 			this.state.root.parentElement!.scrollTop =
 				this.state.root.parentElement!.scrollTop -
-				pixelsPerMillisecond * dt * speed
+				pixelsPerMillisecond * dt * this.speed
 			requestAnimationFrame(tick)
 		}
 		requestAnimationFrame(tick)
@@ -274,7 +279,15 @@ export class SequenceRecorder extends React.PureComponent<
 
 interface SequencePlayerProps {
 	events: Array<MidiEvent>
-	onClear: () => void
+	render: (props: {
+		playing: boolean
+		play: () => void
+		pause: () => void
+		restart: () => void
+		speed: number
+		setSpeed: (speed: number) => void
+		sequencer: JSX.Element
+	}) => React.ReactNode
 }
 
 interface SequencePlayerState {
@@ -304,7 +317,8 @@ export class SequencePlayer extends React.PureComponent<
 				...this.state,
 				playing: true,
 			})
-			this.renderer.startPlaying(this.state.speed, this.handleStop)
+			this.renderer.speed = this.state.speed
+			this.renderer.startPlaying(this.handleStop)
 		}
 	}
 
@@ -318,39 +332,31 @@ export class SequencePlayer extends React.PureComponent<
 		}
 	}
 
-	private handleSpeedChange = e => {
+	private handleRestart = () => {
+		if (this.renderer) {
+			this.renderer.resetScroll()
+		}
+	}
+
+	private handleSpeedChange = (speed: number) => {
 		this.setState({
 			...this.state,
-			speed: e.target.value / 100,
+			speed,
 		})
+		if (this.renderer) {
+			this.renderer.speed = this.state.speed
+		}
 	}
 
 	render() {
-		return (
-			<React.Fragment>
-				<div style={{ paddingBottom: 4 }}>
-					{this.state.playing ? (
-						<button onClick={this.handleStop}>stop</button>
-					) : (
-						<button onClick={this.handlePlay}>play</button>
-					)}
-
-					<button onClick={this.props.onClear}>clear</button>
-
-					<div style={{ width: 80, display: "inline-block" }}>
-						speed: {this.state.speed}
-					</div>
-					<input
-						type="range"
-						min="0"
-						max="300"
-						value={this.state.speed * 100}
-						onChange={this.handleSpeedChange}
-					/>
-				</div>
-
-				<Sequencer onMount={this.handleMount} />
-			</React.Fragment>
-		)
+		return this.props.render({
+			playing: this.state.playing,
+			play: this.handlePlay,
+			pause: this.handleStop,
+			restart: this.handleRestart,
+			speed: this.state.speed,
+			setSpeed: this.handleSpeedChange,
+			sequencer: <Sequencer onMount={this.handleMount} />,
+		})
 	}
 }
