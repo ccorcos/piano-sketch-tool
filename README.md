@@ -1,10 +1,14 @@
 # Piano Sketch Tool
 
-- record with keyboard at top, play with keyboard at bottom.
+- play back notes with the same timing.
+	- speed adjuster
+	- halt feature togglable
+- wait for you to play all the notes before continuing.
+
+- save to url bar
+- clear / restart
 - save notes to a file (or URL bar)
 - load a file with notes
-- play back notes with the same timing.
-- wait for you to play all the notes before continuing.
 
 ## Design
 

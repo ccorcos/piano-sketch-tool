@@ -3,7 +3,7 @@ import { Piano } from "./Piano"
 import {
 	getPianoWidth,
 	pianoSize,
-	windowHeight,
+	sequencerHeight,
 	pixelsPerMillisecond,
 	isBlackNote,
 	whiteNoteWidth,

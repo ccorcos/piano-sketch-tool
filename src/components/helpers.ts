@@ -1,6 +1,6 @@
 export const pianoSize = 18
-export const windowHeight = 400
-export const pixelsPerMillisecond = windowHeight / 2500
+export const sequencerHeight = 400
+export const pixelsPerMillisecond = sequencerHeight / 2500
 
 export const whiteNoteWidth = 20
 export const whiteNoteHeight = 80

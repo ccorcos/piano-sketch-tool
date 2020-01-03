@@ -8,7 +8,7 @@ import {
 	blackNoteColor,
 	whiteNoteColor,
 	pixelsPerMillisecond,
-	windowHeight,
+	sequencerHeight,
 	getPianoWidth,
 	pianoSize,
 } from "./helpers"
@@ -82,10 +82,12 @@ export class SequencerRenderer {
 		for (const event of events) {
 			this.handleEvent(event)
 		}
-		const minMs = _.min(this.state.events.map(e => e.timeMs)) || 0
 		const maxMs = _.max(this.state.events.map(e => e.timeMs)) || 0
-		this.state.root.style.height = `${(maxMs + minMs) * pixelsPerMillisecond}px`
+		const height = maxMs * pixelsPerMillisecond
+		this.state.root.style.height = `${height}px`
 		this.state.root.style.position = "relative"
+		this.state.root.style.paddingTop = `${sequencerHeight}px`
+		this.state.root.parentElement!.scrollTop = height
 	}
 
 	handleEvent(event: MidiEvent) {
@@ -159,7 +161,7 @@ export class Sequencer extends React.PureComponent<SequencerProps> {
 				<div
 					style={{
 						overflow: "auto",
-						height: windowHeight,
+						height: sequencerHeight,
 						border: "1px solid black",
 						boxSizing: "border-box",
 						width: getPianoWidth(pianoSize - 1),
