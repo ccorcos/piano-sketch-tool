@@ -1,8 +1,5 @@
 # Piano Sketch Tool
 
-- better rendering perf
-	- RAF out of state lifecycle
-	- use transform instead of setting height
 - save notes to a file
 - load a file with notes
 - play back notes with the same timing.

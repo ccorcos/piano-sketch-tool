@@ -13,7 +13,7 @@ import {
 	getXPosition,
 } from "./helpers"
 import { ComputerMidiSource } from "./MidiSource"
-import { SequenceRecorder } from "./Sequencer"
+import { SequenceRecorder, MidiEvent, SequencePlayer } from "./Sequencer"
 
 const keyMap = {
 	a: 0,
@@ -38,23 +38,21 @@ const keyMap = {
 
 type AppState =
 	| {
+			type: "start"
 			keys: Set<number>
-			isRecording: false
 	  }
 	| {
+			type: "recording"
 			keys: Set<number>
-			isRecording: true
-			startTime: number
-			currentTime: number
-			notes: Array<
-				| { type: "up"; midiNote: number; time: number }
-				| { type: "down"; midiNote: number; time: number }
-			>
+	  }
+	| {
+			type: "loaded"
+			keys: Set<number>
+			events: Array<MidiEvent>
 	  }
 
 export class App extends React.PureComponent<{}, AppState> {
-	state = { keys: new Set(), isRecording: false } as AppState
-
+	state: AppState = { type: "start" as const, keys: new Set<number>() }
 	source = new ComputerMidiSource()
 
 	componentWillMount() {
@@ -67,23 +65,52 @@ export class App extends React.PureComponent<{}, AppState> {
 	}
 
 	render() {
-		return (
-			<div>
-				{/* {this.state.isRecording ? (
-					<button>stop</button>
-				) : (
-					<button onClick={this.handleStartRecording}>start</button>
-				)} */}
-
-				<SequenceRecorder source={this.source} />
-				<Piano highlight={this.state.keys} size={pianoSize} />
-			</div>
-		)
+		const state = this.state
+		if (state.type === "start") {
+			return (
+				<div>
+					<button onClick={this.handleStartRecording}>record</button>
+					<Piano highlight={state.keys} size={pianoSize} />
+				</div>
+			)
+		} else if (state.type === "recording") {
+			return (
+				<div>
+					<SequenceRecorder
+						source={this.source}
+						handleStop={this.handleStopRecording}
+					/>
+					<Piano highlight={state.keys} size={pianoSize} />
+				</div>
+			)
+		} else {
+			return (
+				<div>
+					<SequencePlayer events={state.events} />
+					<Piano highlight={state.keys} size={pianoSize} />
+				</div>
+			)
+		}
 	}
 
 	// ==============================================================
 	// Events.
 	// ==============================================================
+
+	private handleStopRecording = (events: Array<MidiEvent>) => {
+		this.setState({
+			...this.state,
+			type: "loaded",
+			events,
+		})
+	}
+
+	private handleStartRecording = () => {
+		this.setState({
+			...this.state,
+			type: "recording",
+		})
+	}
 
 	private handleMidiNote = (on: boolean, midiNote: number) => {
 		const newKeys = new Set(this.state.keys)

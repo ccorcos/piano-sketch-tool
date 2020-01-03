@@ -1,3 +1,4 @@
+import * as _ from "lodash"
 import * as React from "react"
 import {
 	getXPosition,
@@ -30,9 +31,10 @@ type SequencerState = {
 	root: HTMLDivElement
 	completedNotes: Array<CompletedNote>
 	incompleteNotes: Array<IncompletedNote>
+	events: Array<MidiEvent>
 }
 
-type MidiEvent = {
+export type MidiEvent = {
 	keyOn: boolean
 	midiNote: number
 	timeMs: number
@@ -51,6 +53,7 @@ export class SequencerRenderer {
 			root: div,
 			completedNotes: [],
 			incompleteNotes: [],
+			events: [],
 		}
 	}
 
@@ -60,7 +63,9 @@ export class SequencerRenderer {
 		this.stopped = true
 	}
 
+	startMs: number | undefined
 	start(startMs: number) {
+		this.startMs = startMs
 		this.stopped = false
 		const tick = () => {
 			if (this.stopped) {
@@ -73,8 +78,24 @@ export class SequencerRenderer {
 		requestAnimationFrame(tick)
 	}
 
+	load(events: Array<MidiEvent>) {
+		for (const event of events) {
+			this.handleEvent(event)
+		}
+		const timeMs = _.max(this.state.events.map(e => e.timeMs)) || 0
+		this.state.root.style.height = `${timeMs * pixelsPerMillisecond}px`
+		this.state.root.style.position = "relative"
+
+		for (const note of this.state.completedNotes) {
+			delete note.elm.style.top
+			note.elm.style.top = null as any
+			note.elm.style.bottom = `${note.startMs * pixelsPerMillisecond}px`
+		}
+	}
+
 	handleEvent(event: MidiEvent) {
 		const { keyOn, midiNote, timeMs } = event
+		this.state.events.push(event)
 
 		if (keyOn) {
 			const i = this.state.incompleteNotes.findIndex(
@@ -123,58 +144,108 @@ export class SequencerRenderer {
 	}
 }
 
-interface SequenceRecorderProps {
-	source: ComputerMidiSource
+interface SequencerProps {
+	onMount: (renderer: SequencerRenderer) => void
 }
 
-export class SequenceRecorder extends React.PureComponent<
-	SequenceRecorderProps
-> {
-	startMs = Date.now()
-	componentDidMount() {
-		this.props.source.addListener(this.handleMidiNote)
-	}
-
-	componentWillUnmount() {
-		this.props.source.removeListener(this.handleMidiNote)
-		if (this.renderer) {
-			this.renderer.stop()
-		}
-	}
-
+export class Sequencer extends React.PureComponent<SequencerProps> {
 	private renderer: SequencerRenderer | undefined
 
 	private handleRef = (div: HTMLDivElement | null) => {
 		if (div) {
 			this.renderer = new SequencerRenderer(div)
-			this.renderer.start(this.startMs)
+			this.props.onMount(this.renderer)
+		}
+	}
+
+	render() {
+		return (
+			<React.Fragment>
+				<div
+					style={{
+						overflow: "auto",
+						height: windowHeight,
+						border: "1px solid black",
+						boxSizing: "border-box",
+						width: getPianoWidth(pianoSize - 1),
+						position: "relative",
+					}}
+				>
+					<div ref={this.handleRef}></div>
+				</div>
+			</React.Fragment>
+		)
+	}
+}
+
+interface SequenceRecorderProps {
+	source: ComputerMidiSource
+	handleStop: (events: Array<MidiEvent>) => void
+}
+
+export class SequenceRecorder extends React.PureComponent<
+	SequenceRecorderProps
+> {
+	private renderer: SequencerRenderer | undefined
+
+	private handleMount = (renderer: SequencerRenderer) => {
+		this.renderer = renderer
+		this.handleStart()
+	}
+
+	private handleStart = () => {
+		if (this.renderer) {
+			this.props.source.addListener(this.handleMidiNote)
+			this.renderer.start(Date.now())
+		}
+	}
+
+	private handleStop = () => {
+		this.props.source.removeListener(this.handleMidiNote)
+		if (this.renderer) {
+			this.renderer.stop()
+			this.props.handleStop(this.renderer.state.events)
 		}
 	}
 
 	private handleMidiNote = (keyOn: boolean, midiNote: number) => {
-		if (this.renderer) {
+		if (this.renderer && this.renderer.startMs) {
 			this.renderer.handleEvent({
 				keyOn,
 				midiNote,
-				timeMs: Date.now() - this.startMs,
+				timeMs: Date.now() - this.renderer.startMs,
 			})
 		}
 	}
 
 	render() {
 		return (
-			<div
-				style={{
-					overflow: "auto",
-					height: windowHeight,
-					border: "1px solid black",
-					boxSizing: "border-box",
-					width: getPianoWidth(pianoSize - 1),
-					position: "relative",
-				}}
-			>
-				<div ref={this.handleRef}></div>
-			</div>
+			<React.Fragment>
+				<button onClick={this.handleStop}>stop</button>
+				<Sequencer onMount={this.handleMount} />
+			</React.Fragment>
+		)
+	}
+}
+
+interface SequencePlayerProps {
+	events: Array<MidiEvent>
+}
+
+export class SequencePlayer extends React.PureComponent<SequencePlayerProps> {
+	private renderer: SequencerRenderer | undefined
+
+	private handleMount = (renderer: SequencerRenderer) => {
+		this.renderer = renderer
+		this.renderer.load(this.props.events)
+	}
+
+	render() {
+		return (
+			<React.Fragment>
+				<button>play?</button>
+				<Sequencer onMount={this.handleMount} />
+			</React.Fragment>
 		)
 	}
 }
