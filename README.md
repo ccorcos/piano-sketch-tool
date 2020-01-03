@@ -4,9 +4,9 @@ The goal of this project is to create a tool for recording piano ideas as well a
 
 ## Features
 
+- url encoding that's more compressed.
 - play back notes with the same timing.
 	- halt feature togglable -- wait for you to play all the notes before continuing.
-- url encoding that's more compressed.
 
 - save to url bar
 - clear / restart

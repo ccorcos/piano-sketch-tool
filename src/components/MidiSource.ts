@@ -21,7 +21,12 @@ const keyMap = {
 
 type MidiNodeListener = (on: boolean, midiNote: number) => void
 
-export class ComputerMidiSource {
+export interface Emitter<T extends Array<any>> {
+	addListener(fn: (...args: T) => void): void
+	removeListener(fn: (...args: T) => void): void
+}
+
+export class ComputerMidiSource implements Emitter<[boolean, number]> {
 	listeners: Set<MidiNodeListener> = new Set()
 	addListener(fn: MidiNodeListener) {
 		this.listeners.add(fn)

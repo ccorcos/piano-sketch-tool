@@ -1,5 +1,4 @@
 import * as _ from "lodash"
-import * as url from "url"
 import * as React from "react"
 import {
 	getXPosition,
@@ -14,6 +13,7 @@ import {
 	pianoSize,
 } from "./helpers"
 import { ComputerMidiSource } from "./MidiSource"
+import { setSongUrl } from "./routeHelpers"
 
 type CompletedNote = {
 	midiNote: number
@@ -90,11 +90,7 @@ export class SequencerRenderer {
 		this.state.root.style.paddingTop = `${sequencerHeight}px`
 		this.state.root.parentElement!.scrollTop = height
 
-		const parsed = url.parse(location.href, true)
-		delete parsed.search
-		parsed.query.song = JSON.stringify(events)
-		const next = url.format(parsed)
-		history.pushState({}, "", next)
+		setSongUrl(events)
 	}
 
 	playing = false

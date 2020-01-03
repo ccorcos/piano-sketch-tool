@@ -1,41 +1,9 @@
 import * as React from "react"
 import { Piano } from "./Piano"
-import {
-	getPianoWidth,
-	pianoSize,
-	sequencerHeight,
-	pixelsPerMillisecond,
-	isBlackNote,
-	whiteNoteWidth,
-	blackNoteWidth,
-	whiteNoteColor,
-	blackNoteColor,
-	getXPosition,
-} from "./helpers"
+import { pianoSize } from "./helpers"
 import { ComputerMidiSource } from "./MidiSource"
 import { SequenceRecorder, MidiEvent, SequencePlayer } from "./Sequencer"
-import * as url from "url"
-
-const keyMap = {
-	a: 0,
-	w: 1,
-	s: 2,
-	e: 3,
-	d: 4,
-	f: 5,
-	t: 6,
-	g: 7,
-	y: 8,
-	h: 9,
-	u: 10,
-	j: 11,
-	k: 12,
-	o: 13,
-	l: 14,
-	p: 15,
-	";": 16,
-	"'": 17,
-}
+import { clearSongUrl, getSongUrl } from "./routeHelpers"
 
 type AppState =
 	| {
@@ -58,9 +26,8 @@ export class App extends React.PureComponent<{}, AppState> {
 
 	constructor(props) {
 		super(props)
-		const parsed = url.parse(location.href, true)
-		if (parsed.query.song) {
-			const events = JSON.parse(decodeURIComponent(parsed.query.song as string))
+		const events = getSongUrl(location.href)
+		if (events) {
 			this.state = {
 				...this.state,
 				type: "loaded",
@@ -112,11 +79,7 @@ export class App extends React.PureComponent<{}, AppState> {
 	// ==============================================================
 
 	private handleReset = () => {
-		const parsed = url.parse(location.href, true)
-		delete parsed.search
-		delete parsed.query
-		const next = url.format(parsed)
-		history.pushState({}, "", next)
+		clearSongUrl()
 		this.setState({
 			...this.state,
 			type: "start",
