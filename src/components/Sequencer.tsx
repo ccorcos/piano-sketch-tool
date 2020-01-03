@@ -12,7 +12,7 @@ import {
 	getPianoWidth,
 	pianoSize,
 } from "./helpers"
-import { ComputerMidiSource } from "./MidiSource"
+import { MidiSource } from "./MidiSource"
 import { setSongUrl } from "./routeHelpers"
 
 type CompletedNote = {
@@ -209,7 +209,7 @@ export class Sequencer extends React.PureComponent<SequencerProps> {
 }
 
 interface SequenceRecorderProps {
-	source: ComputerMidiSource
+	source: MidiSource
 	handleStop: (events: Array<MidiEvent>) => void
 }
 

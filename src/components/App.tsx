@@ -1,7 +1,7 @@
 import * as React from "react"
 import { Piano } from "./Piano"
 import { pianoSize } from "./helpers"
-import { ComputerMidiSource } from "./MidiSource"
+import { WebMidiSource } from "./MidiSource"
 import { SequenceRecorder, MidiEvent, SequencePlayer } from "./Sequencer"
 import { clearSongUrl, getSongUrl } from "./routeHelpers"
 
@@ -22,7 +22,7 @@ type AppState =
 
 export class App extends React.PureComponent<{}, AppState> {
 	state: AppState = { type: "start" as const, keys: new Set<number>() }
-	source = new ComputerMidiSource()
+	source = new WebMidiSource()
 
 	constructor(props) {
 		super(props)

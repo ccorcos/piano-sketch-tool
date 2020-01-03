@@ -1,4 +1,4 @@
-export const pianoSize = 18
+export const pianoSize = 72
 export const sequencerHeight = 400
 export const pixelsPerMillisecond = sequencerHeight / 2500
 
