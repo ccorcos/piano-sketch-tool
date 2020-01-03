@@ -100,7 +100,7 @@ export class App extends React.PureComponent<{}, AppState> {
 		} else {
 			return (
 				<div>
-					<SequencePlayer events={state.events} />
+					<SequencePlayer events={state.events} onClear={this.handleReset} />
 					<Piano highlight={state.keys} size={pianoSize} />
 				</div>
 			)
@@ -110,6 +110,18 @@ export class App extends React.PureComponent<{}, AppState> {
 	// ==============================================================
 	// Events.
 	// ==============================================================
+
+	private handleReset = () => {
+		const parsed = url.parse(location.href, true)
+		delete parsed.search
+		delete parsed.query
+		const next = url.format(parsed)
+		history.pushState({}, "", next)
+		this.setState({
+			...this.state,
+			type: "start",
+		})
+	}
 
 	private handleStopRecording = (events: Array<MidiEvent>) => {
 		this.setState({

@@ -1,4 +1,5 @@
 import * as _ from "lodash"
+import * as url from "url"
 import * as React from "react"
 import {
 	getXPosition,
@@ -89,11 +90,11 @@ export class SequencerRenderer {
 		this.state.root.style.paddingTop = `${sequencerHeight}px`
 		this.state.root.parentElement!.scrollTop = height
 
-		history.pushState(
-			{},
-			"",
-			"/?song=" + encodeURIComponent(JSON.stringify(events))
-		)
+		const parsed = url.parse(location.href, true)
+		delete parsed.search
+		parsed.query.song = JSON.stringify(events)
+		const next = url.format(parsed)
+		history.pushState({}, "", next)
 	}
 
 	playing = false
@@ -263,6 +264,7 @@ export class SequenceRecorder extends React.PureComponent<
 
 interface SequencePlayerProps {
 	events: Array<MidiEvent>
+	onClear: () => void
 }
 
 interface SequencePlayerState {
@@ -322,6 +324,8 @@ export class SequencePlayer extends React.PureComponent<
 					) : (
 						<button onClick={this.handlePlay}>play</button>
 					)}
+
+					<button onClick={this.props.onClear}>clear</button>
 
 					<div style={{ width: 80, display: "inline-block" }}>
 						speed: {this.state.speed}
