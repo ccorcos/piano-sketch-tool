@@ -1,15 +1,25 @@
 # Piano Sketch Tool [Demo](https://ccorcos.github.io/piano-sketch-tool)
 
+The goal of this project is to create a tool for recording piano ideas as well as learning how to play piano songs. It is designed be easily shared with a url.
+
+## Features
+
 - play back notes with the same timing.
-	- speed adjuster
-	- halt feature togglable
+	- halt feature togglable -- wait for you to play all the notes before continuing.
 - url encoding that's more compressed.
-- wait for you to play all the notes before continuing.
 
 - save to url bar
 - clear / restart
 - save notes to a file (or URL bar)
 - load a file with notes
+
+### Later
+
+- select and loop a section
+
+## Refactor
+
+- Can we model the entire UI as a mutable state machine?
 
 ## Bugs
 
