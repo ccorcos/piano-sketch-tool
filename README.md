@@ -34,3 +34,9 @@ git remote remove origin
 npm install
 npm start
 ```
+
+You can test out this program without connecting to a MIDI device by running the midi simulator
+
+```sh
+node src/midi-simulator.js
+```
