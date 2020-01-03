@@ -338,7 +338,8 @@ export class SequencePlayer extends React.PureComponent<
 		}
 	}
 
-	private handleSpeedChange = (speed: number) => {
+	private handleSpeedChange = (s: number) => {
+		const speed = Math.min(3, Math.max(0, s))
 		this.setState({
 			...this.state,
 			speed,

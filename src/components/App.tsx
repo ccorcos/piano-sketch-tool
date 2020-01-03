@@ -4,6 +4,7 @@ import { pianoSize, getPianoWidth } from "./helpers"
 import { WebMidiSource } from "./MidiSource"
 import { SequenceRecorder, MidiEvent, SequencePlayer } from "./Sequencer"
 import { clearSongUrl, getSongUrl } from "./routeHelpers"
+import { KeyboardShorcuts } from "./KeyboardShorcuts"
 
 const border = "1px solid #B8B8B8"
 
@@ -48,8 +49,19 @@ export class App extends React.PureComponent<{}, AppState> {
 			<div
 				style={{ paddingBottom: 10, borderBottom: border, marginBottom: "2em" }}
 			>
-				<button style={{ marginRight: 4 }}>New Sketch (N)</button>
-				<button style={{ marginRight: 4 }}>Open Sketch (O)</button>
+				<button style={{ marginRight: 4 }} onClick={this.handleNewSketch}>
+					New Sketch (N)
+				</button>
+				{/* <button style={{ marginRight: 4 }}>Open Sketch (O)</button> */}
+				<KeyboardShorcuts
+					keydown={key => {
+						if (key === "n") {
+							this.handleNewSketch()
+						} else if (key === "o") {
+							// TODO:
+						}
+					}}
+				/>
 			</div>
 		)
 	}
@@ -61,52 +73,68 @@ export class App extends React.PureComponent<{}, AppState> {
 				<div style={{ margin: "2em auto", width: getPianoWidth(pianoSize) }}>
 					<SequenceRecorder
 						source={this.source}
-						render={({ recording, start, stop, sequencer }) => (
-							<div>
-								{this.renderTopbar()}
+						render={({ recording, start, stop, sequencer }) => {
+							const handleStop = () => {
+								const events = stop()
+								this.setState({
+									...this.state,
+									type: "loaded",
+									events,
+								})
+							}
+							const handleRecord = () => {
+								const events = start()
+								this.setState({
+									...this.state,
+									type: "recording",
+								})
+							}
+							return (
+								<div>
+									{this.renderTopbar()}
 
-								<div style={{ marginBottom: 12 }}>
-									<div>
-										<input
-											style={{ marginBottom: 4 }}
-											placeholder="Untitled Sketch"
-										></input>
+									<div style={{ marginBottom: 12 }}>
+										{/* <div>
+											<input
+												style={{ marginBottom: 4 }}
+												placeholder="Untitled Sketch"
+											></input>
+										</div> */}
+
+										{recording ? (
+											<button
+												style={{ marginRight: 4, marginBottom: 16 }}
+												onClick={handleStop}
+											>
+												Stop (SPACE)
+											</button>
+										) : (
+											<button
+												style={{ marginRight: 4, marginBottom: 16 }}
+												onClick={handleRecord}
+											>
+												Record (SPACE)
+											</button>
+										)}
+
+										<KeyboardShorcuts
+											keydown={key => {
+												if (key === " ") {
+													if (recording) {
+														handleStop()
+													} else {
+														handleRecord()
+													}
+												}
+											}}
+										/>
 									</div>
 
-									{recording ? (
-										<button
-											style={{ marginRight: 4, marginBottom: 16 }}
-											onClick={() => {
-												const events = stop()
-												this.setState({
-													...this.state,
-													type: "loaded",
-													events,
-												})
-											}}
-										>
-											Stop (SPACE)
-										</button>
-									) : (
-										<button
-											style={{ marginRight: 4, marginBottom: 16 }}
-											onClick={() => {
-												const events = start()
-												this.setState({
-													...this.state,
-													type: "recording",
-												})
-											}}
-										>
-											Record (SPACE)
-										</button>
-									)}
+									<Piano highlight={state.keys} size={pianoSize} />
+									{sequencer}
 								</div>
-
-								<Piano highlight={state.keys} size={pianoSize} />
-								{sequencer}
-							</div>
-						)}
+							)
+						}}
 					/>
 				</div>
 			)
@@ -127,7 +155,7 @@ export class App extends React.PureComponent<{}, AppState> {
 						}) => (
 							<div>
 								<div style={{ marginBottom: 12 }}>
-									<div>
+									{/* <div>
 										<input
 											style={{ marginBottom: 4 }}
 											placeholder="Untitled Sketch"
@@ -135,15 +163,37 @@ export class App extends React.PureComponent<{}, AppState> {
 										<span style={{ marginLeft: 4, fontSize: 12 }}>
 											2020-01-01 16:42
 										</span>
-									</div>
+									</div> */}
 
 									{playing ? (
-										<button onClick={pause}>Pause (SPACE)</button>
+										<button style={{ width: 100 }} onClick={pause}>
+											Pause (SPACE)
+										</button>
 									) : (
-										<button onClick={play}>Play (SPACE)</button>
+										<button style={{ width: 100 }} onClick={play}>
+											Play (SPACE)
+										</button>
 									)}
 
 									<button onClick={restart}>Restart (ENTER)</button>
+
+									<KeyboardShorcuts
+										keydown={key => {
+											if (key === " ") {
+												if (playing) {
+													pause()
+												} else {
+													play()
+												}
+											} else if (key === "Enter") {
+												restart()
+											} else if (key === "ArrowRight") {
+												setSpeed(speed + 0.25)
+											} else if (key === "ArrowLeft") {
+												setSpeed(speed - 0.25)
+											}
+										}}
+									/>
 
 									<div style={{ display: "inline-flex" }}>
 										<span style={{ margin: "0 4px", fontSize: 12 }}>
@@ -175,7 +225,7 @@ export class App extends React.PureComponent<{}, AppState> {
 	// Events.
 	// ==============================================================
 
-	private handleReset = () => {
+	handleNewSketch() {
 		clearSongUrl()
 		this.setState({
 			...this.state,
