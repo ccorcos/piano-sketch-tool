@@ -116,12 +116,18 @@ export class App extends React.PureComponent<{}, AppState> {
 												Stop (SPACE)
 											</button>
 										) : (
-											<button
-												style={{ marginRight: 4, marginBottom: 16 }}
-												onClick={handleRecord}
-											>
-												Record (SPACE)
-											</button>
+											<>
+												<button
+													style={{ marginRight: 4, marginBottom: 16 }}
+													onClick={handleRecord}
+												>
+													Record (SPACE)
+												</button>
+												<span style={{ fontSize: 14, float: "right" }}>
+													Connect a Midi device and you should see notes
+													highlighted below.
+												</span>
+											</>
 										)}
 
 										<KeyboardShorcuts
@@ -181,6 +187,10 @@ export class App extends React.PureComponent<{}, AppState> {
 											Play (SPACE)
 										</button>
 									)}
+
+									<span style={{ fontSize: 14, float: "right" }}>
+										Share this link with a friend!
+									</span>
 
 									<button onClick={restart}>Restart (ENTER)</button>
 

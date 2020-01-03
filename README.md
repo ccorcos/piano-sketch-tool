@@ -1,4 +1,4 @@
-# Piano Sketch Tool [Live Demo](https://ccorcos.github.io/piano-sketch-tool)
+# Piano Sketch Tool [[Live Demo]](https://ccorcos.github.io/piano-sketch-tool)
 
 The goal of this project is to create a tool for recording, learning, and sharing piano songs.
 
