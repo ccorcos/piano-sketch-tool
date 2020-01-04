@@ -8,9 +8,14 @@ The goal of this project is to create a tool for recording, learning, and sharin
 ## To-Do
 
 - Features
-	- halt feature togglable -- wait for you to play all the notes before continuing.
-	- trim the beginning of the song to one second of lead-in.
+	- Highlight piano note tracks.
+	- Gallery URI too long for Github.
+		- Deploy to now.sh?
+		- better compression?
+	- wait mode -- wait for you to play all the notes before continuing.
 	- play the song aloud do you can hear it.
+	- even slower mode -- maybe it log(N) in the slide?
+	- trim the beginning of the song to one second of lead-in.
 
 	- ui stuff
 		- time elapsed
