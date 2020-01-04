@@ -1,7 +1,7 @@
 import * as React from "react"
 
 interface KeyboardShorcutsProps {
-	keydown: (key: string) => void
+	keydown: (key: string) => boolean | void | undefined
 }
 
 export class KeyboardShorcuts extends React.PureComponent<
@@ -16,7 +16,9 @@ export class KeyboardShorcuts extends React.PureComponent<
 	}
 
 	private handleKeyDown = e => {
-		this.props.keydown(e.key)
+		if (this.props.keydown(e.key)) {
+			e.preventDefault()
+		}
 	}
 
 	render() {

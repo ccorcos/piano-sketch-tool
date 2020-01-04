@@ -64,6 +64,7 @@ export class App extends React.PureComponent<{}, AppState> {
 					keydown={key => {
 						if (key === "n") {
 							this.handleNewSketch()
+							return true
 						} else if (key === "o") {
 							// TODO:
 						}
@@ -135,8 +136,10 @@ export class App extends React.PureComponent<{}, AppState> {
 												if (key === " ") {
 													if (recording) {
 														handleStop()
+														return true
 													} else {
 														handleRecord()
+														return true
 													}
 												}
 											}}
@@ -203,12 +206,16 @@ export class App extends React.PureComponent<{}, AppState> {
 												} else {
 													play()
 												}
+												return true
 											} else if (key === "Enter") {
 												restart()
+												return true
 											} else if (key === "ArrowRight") {
 												setSpeed(speed + 0.25)
+												return true
 											} else if (key === "ArrowLeft") {
 												setSpeed(speed - 0.25)
+												return true
 											}
 										}}
 									/>
