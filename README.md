@@ -9,6 +9,7 @@ The goal of this project is to create a tool for recording, learning, and sharin
 
 - Features
 	- Highlight piano note tracks.
+		- Separate rendering, recording, and playing logic for the sequencer.
 	- Gallery URI too long for Github.
 		- Deploy to now.sh?
 		- better compression?

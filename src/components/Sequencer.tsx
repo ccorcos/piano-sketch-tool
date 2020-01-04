@@ -44,6 +44,8 @@ export type MidiEvent = {
 export class SequencerRenderer {
 	state: SequencerState
 
+	guides: { [midiNote: number]: HTMLDivElement } = {}
+
 	constructor(div: HTMLDivElement) {
 		div.style.position = "absolute"
 		div.style.top = "0px"
@@ -57,10 +59,10 @@ export class SequencerRenderer {
 			events: [],
 		}
 
-		// Create the guides
 		for (let i = midiRange.start; i < midiRange.end; i++) {
+			// Create the guides
 			if (i % 12 === 0 || i % 12 === 5) {
-				const makeElm = () => {
+				const makeGuide = () => {
 					const elm = document.createElement("div")
 					elm.style.position = "absolute"
 					elm.style.top = "0px"
@@ -70,9 +72,39 @@ export class SequencerRenderer {
 					elm.style.left = `${getXPosition(i) - 2}px`
 					return elm
 				}
-				div.appendChild(makeElm())
-				div.parentElement!.appendChild(makeElm())
+				div.appendChild(makeGuide())
+				div.parentElement!.appendChild(makeGuide())
 			}
+
+			// Create note guides
+			const makeNoteGuide = () => {
+				const elm = document.createElement("div")
+				elm.style.position = "absolute"
+				elm.style.top = "0px"
+				elm.style.bottom = "0px"
+				elm.style.width = isBlackNote(i)
+					? `${blackNoteWidth}px`
+					: `${whiteNoteWidth}px`
+				elm.style.background = isBlackNote(i) ? blackNoteColor : whiteNoteColor
+				elm.style.left = `${getXPosition(i)}px`
+				elm.style.opacity = 0 as any
+				this.guides[i] = elm
+				return elm
+			}
+
+			div.appendChild(makeNoteGuide())
+
+			// TODO: need to rethink the Sequencer abstraction.
+			// if (this.playMode) {
+			// 	if (keyOn) {
+			// 		this.guides[midiNote].style.opacity = 0.3 as any
+			// 		console.log(this.guides[midiNote], "on")
+			// 	} else {
+			// 		this.guides[midiNote].style.opacity = 0.0 as any
+
+			// 		console.log(this.guides[midiNote], "off")
+			// 	}
+			// }
 		}
 	}
 
