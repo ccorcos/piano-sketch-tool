@@ -8,8 +8,21 @@ The goal of this project is to create a tool for recording, learning, and sharin
 ## To-Do
 
 - Features
-	- Highlight piano note tracks.
-		- Separate rendering, recording, and playing logic for the sequencer.
+	- Highlight piano note tracks for the player.
+
+		// TODO: need to rethink the Sequencer abstraction.
+		// if (this.playMode) {
+		// 	if (keyOn) {
+		// 		this.guides[midiNote].style.opacity = 0.3 as any
+		// 		console.log(this.guides[midiNote], "on")
+		// 	} else {
+		// 		this.guides[midiNote].style.opacity = 0.0 as any
+
+		// 		console.log(this.guides[midiNote], "off")
+		// 	}
+		// }
+
+	- pervent default on space / enter
 	- Gallery URI too long for Github.
 		- Deploy to now.sh?
 		- better compression?

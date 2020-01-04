@@ -41,203 +41,17 @@ export type MidiEvent = {
 	timeMs: number
 }
 
-type SequencerState = {
-	rootElm: HTMLDivElement
-	scrollerElm: HTMLDivElement
-	noteGuides: Record<number, HTMLDivElement>
-}
+class Sequencer {
+	public rootElm: HTMLDivElement
+	public scrollerElm: HTMLDivElement
+	public noteGuides: Record<number, HTMLDivElement> = {}
+	public completedNotes: Array<CompletedNote> = []
+	public incompleteNotes: Array<IncompletedNote> = []
 
-type RecordingState = {
-	recording: boolean
-	sequencer: SequencerState
-	completedNotes: Array<CompletedNote>
-	incompleteNotes: Array<IncompletedNote>
-	events: Array<MidiEvent>
-}
-
-type PlayerState = {
-	playing: boolean
-	sequencer: SequencerState
-}
-
-function initSequencer(div: HTMLDivElement): SequencerState {
-	div.style.position = "absolute"
-	div.style.top = "0px"
-	div.style.left = "0px"
-	div.style.right = "0px"
-	div.style.height = "0px"
-
-	const noteGuides: Record<number, HTMLDivElement> = {}
-
-	for (let i = midiRange.start; i < midiRange.end; i++) {
-		// Create the light gray guide lines
-		if (i % 12 === 0 || i % 12 === 5) {
-			const makeGuide = () => {
-				const elm = document.createElement("div")
-				elm.style.position = "absolute"
-				elm.style.top = "0px"
-				elm.style.bottom = "0px"
-				elm.style.width = "2px"
-				elm.style.background = "#d0d0d0"
-				elm.style.left = `${getXPosition(i) - 2}px`
-				return elm
-			}
-			div.appendChild(makeGuide())
-			div.parentElement!.appendChild(makeGuide())
-		}
-
-		// Create note highlight guides
-		const makeNoteGuide = () => {
-			const elm = document.createElement("div")
-			elm.style.position = "absolute"
-			elm.style.top = "0px"
-			elm.style.bottom = "0px"
-			elm.style.width = isBlackNote(i)
-				? `${blackNoteWidth}px`
-				: `${whiteNoteWidth}px`
-			elm.style.background = isBlackNote(i) ? blackNoteColor : whiteNoteColor
-			elm.style.left = `${getXPosition(i)}px`
-			elm.style.opacity = 0 as any
-			noteGuides[i] = elm
-			return elm
-		}
-
-		div.appendChild(makeNoteGuide())
-	}
-
-	const scrollerElm = div.parentElement! as HTMLDivElement
-
-	return { noteGuides, rootElm: div, scrollerElm }
-}
-
-function initRecording(div: HTMLDivElement): RecordingState {
-	return {
-		sequencer: initSequencer(div),
-		recording: false,
-		completedNotes: [],
-		incompleteNotes: [],
-		events: [],
-	}
-}
-
-function initPlayer(div: HTMLDivElement): PlayerState {
-	return {
-		playing: false,
-		sequencer: initSequencer(div),
-		// completedNotes: [],
-		// incompleteNotes: [],
-		// events: [],
-	}
-}
-
-function startRecording() {}
-function stopRecording() {}
-
-function startPlaying() {}
-function stopPlaying() {}
-function restartPlayer() {}
-
-// TODO: need to rethink the Sequencer abstraction.
-// if (this.playMode) {
-// 	if (keyOn) {
-// 		this.guides[midiNote].style.opacity = 0.3 as any
-// 		console.log(this.guides[midiNote], "on")
-// 	} else {
-// 		this.guides[midiNote].style.opacity = 0.0 as any
-
-// 		console.log(this.guides[midiNote], "off")
-// 	}
-// }
-
-export class SequencerRenderer {
-	state: SequencerRecordingState
-
-	constructor(div: HTMLDivElement) {
-		initSequencer(div)
-		this.state = {
-			root: div,
-			completedNotes: [],
-			incompleteNotes: [],
-			events: [],
-		}
-	}
-
-	recording = false
-
-	stopRecording() {
-		this.recording = false
-	}
-
-	startMs: number | undefined
-	startRecording(startMs: number) {
-		this.startMs = startMs
-		this.recording = true
-		const tick = () => {
-			if (!this.recording) {
-				return
-			}
-			const timeMs = Date.now() - startMs
-			this.state.root.style.height = `${timeMs * pixelsPerMillisecond}px`
-			requestAnimationFrame(tick)
-		}
-		requestAnimationFrame(tick)
-	}
-
-	load(events: Array<MidiEvent>) {
-		for (const event of events) {
-			this.handleEvent(event)
-		}
-		const maxMs = _.max(this.state.events.map(e => e.timeMs)) || 0
-		const height = maxMs * pixelsPerMillisecond
-		this.state.root.style.height = `${height}px`
-		this.state.root.style.position = "relative"
-		this.state.root.style.paddingTop = `${sequencerHeight}px`
-		this.state.root.parentElement!.scrollTop = height
-
-		setSongUrl(events)
-	}
-
-	resetScroll() {
-		this.state.root.parentElement!.scrollTop = this.state.root.parentElement!.scrollHeight
-	}
-
-	playing = false
-	speed = 1
-	startPlaying(finished?: () => void) {
-		let prev = Date.now()
-		this.playing = true
-		const tick = () => {
-			if (!this.playing) {
-				return
-			}
-			if (this.state.root.parentElement!.scrollTop <= 0) {
-				this.stopPlaying()
-				if (finished) {
-					finished()
-				}
-				return
-			}
-			const dt = Date.now() - prev
-			prev = Date.now()
-
-			this.state.root.parentElement!.scrollTop =
-				this.state.root.parentElement!.scrollTop -
-				pixelsPerMillisecond * dt * this.speed
-			requestAnimationFrame(tick)
-		}
-		requestAnimationFrame(tick)
-	}
-
-	stopPlaying() {
-		this.playing = false
-	}
-
-	handleEvent(event: MidiEvent) {
+	public renderMidiNote(event: MidiEvent) {
 		const { keyOn, midiNote, timeMs } = event
-		this.state.events.push(event)
-
 		if (keyOn) {
-			const i = this.state.incompleteNotes.findIndex(
+			const i = this.incompleteNotes.findIndex(
 				note => note.midiNote === midiNote
 			)
 			if (i !== -1) {
@@ -259,41 +73,205 @@ export class SequencerRenderer {
 				? blackNoteColor
 				: whiteNoteColor
 
-			this.state.root.appendChild(div)
+			this.rootElm.appendChild(div)
 
-			this.state.incompleteNotes.push({
+			this.incompleteNotes.push({
 				midiNote,
 				startMs: timeMs,
 				elm: div,
 			})
 		} else {
-			const i = this.state.incompleteNotes.findIndex(
+			const i = this.incompleteNotes.findIndex(
 				note => note.midiNote === midiNote
 			)
 			if (i !== -1) {
-				const [note] = this.state.incompleteNotes.splice(i, 1)
+				const [note] = this.incompleteNotes.splice(i, 1)
 				note.elm.style.top = null as any
 				note.elm.style.height = `${(timeMs - note.startMs) *
 					pixelsPerMillisecond}px`
-				this.state.completedNotes.push({ ...note, endMs: timeMs })
+				this.completedNotes.push({ ...note, endMs: timeMs })
 			} else {
 				console.log("missing!")
 			}
 		}
 	}
+
+	constructor(div: HTMLDivElement) {
+		// Reset
+		while (div.firstChild) {
+			div.removeChild(div.firstChild)
+		}
+
+		div.style.position = "absolute"
+		div.style.top = "0px"
+		div.style.left = "0px"
+		div.style.right = "0px"
+		div.style.height = "0px"
+
+		for (let i = midiRange.start; i < midiRange.end; i++) {
+			// Create the light gray guide lines
+			if (i % 12 === 0 || i % 12 === 5) {
+				const makeGuide = () => {
+					const elm = document.createElement("div")
+					elm.style.position = "absolute"
+					elm.style.top = "0px"
+					elm.style.bottom = "0px"
+					elm.style.width = "2px"
+					elm.style.background = "#d0d0d0"
+					elm.style.left = `${getXPosition(i) - 2}px`
+					return elm
+				}
+				div.appendChild(makeGuide())
+				div.parentElement!.appendChild(makeGuide())
+			}
+
+			// Create note highlight guides
+			const makeNoteGuide = () => {
+				const elm = document.createElement("div")
+				elm.style.position = "absolute"
+				elm.style.top = "0px"
+				elm.style.bottom = "0px"
+				elm.style.width = isBlackNote(i)
+					? `${blackNoteWidth}px`
+					: `${whiteNoteWidth}px`
+				elm.style.background = isBlackNote(i) ? blackNoteColor : whiteNoteColor
+				elm.style.left = `${getXPosition(i)}px`
+				elm.style.opacity = 0 as any
+				this.noteGuides[i] = elm
+				return elm
+			}
+
+			div.appendChild(makeNoteGuide())
+		}
+		this.rootElm = div
+		this.scrollerElm = div.parentElement! as HTMLDivElement
+	}
 }
 
-interface SequencerProps {
-	onMount: (renderer: SequencerRenderer) => void
+class NewRecording {
+	public sequencer: Sequencer
+
+	public startRecording(source: MidiSource) {
+		return new Recording(this, source)
+	}
+
+	constructor(div: HTMLDivElement) {
+		this.sequencer = new Sequencer(div)
+	}
 }
 
-export class Sequencer extends React.PureComponent<SequencerProps> {
-	private renderer: SequencerRenderer | undefined
+class Recording {
+	public sequencer: Sequencer
+	public events: Array<MidiEvent> = []
 
+	public recordMidiEvent = (keyOn: boolean, midiNote: number) => {
+		const event: MidiEvent = {
+			keyOn,
+			midiNote,
+			timeMs: Date.now() - this.startMs,
+		}
+		this.events.push(event)
+		this.sequencer.renderMidiNote(event)
+	}
+
+	public stopRecording = () => {
+		this.source.removeListener(this.recordMidiEvent)
+		this.isRecording = false
+		return cleanMidiEvents(this.events)
+	}
+
+	private source: MidiSource
+	constructor(state: NewRecording, source: MidiSource) {
+		this.sequencer = state.sequencer
+		this.source = source
+		this.source.addListener(this.recordMidiEvent)
+		requestAnimationFrame(this.tick)
+	}
+
+	private isRecording = true
+	private startMs = Date.now()
+	private tick = () => {
+		if (!this.isRecording) {
+			return
+		}
+		const timeMs = Date.now() - this.startMs
+		this.sequencer.rootElm.style.height = `${timeMs * pixelsPerMillisecond}px`
+		requestAnimationFrame(this.tick)
+	}
+}
+
+class Player {
+	public sequencer: Sequencer
+	public events: Array<MidiEvent>
+
+	public resetScroller() {
+		this.sequencer.scrollerElm.scrollTop = this.sequencer.scrollerElm.scrollHeight
+	}
+
+	constructor(div: HTMLDivElement, events: Array<MidiEvent>) {
+		this.sequencer = new Sequencer(div)
+		this.events = events
+
+		for (const event of events) {
+			this.sequencer.renderMidiNote(event)
+		}
+
+		const maxMs = _.max(events.map(e => e.timeMs)) || 0
+		const height = maxMs * pixelsPerMillisecond
+		this.sequencer.rootElm.style.height = `${height}px`
+		this.sequencer.rootElm.style.position = "relative"
+		this.sequencer.rootElm.style.paddingTop = `${sequencerHeight}px`
+		this.sequencer.scrollerElm.scrollTop = height
+
+		setSongUrl(events)
+	}
+
+	private playing = false
+	public speed = 1
+	private onFinishedPlaying = _.noop
+	private lastTickMs: number
+
+	public stopPlaying() {
+		this.playing = false
+	}
+
+	private tick = () => {
+		if (!this.playing) {
+			return
+		}
+		if (this.sequencer.scrollerElm.scrollTop <= 0) {
+			this.stopPlaying()
+			this.onFinishedPlaying()
+			return
+		}
+		const dt = Date.now() - this.lastTickMs
+		this.lastTickMs = Date.now()
+
+		this.sequencer.scrollerElm.scrollTop =
+			this.sequencer.scrollerElm.scrollTop -
+			pixelsPerMillisecond * dt * this.speed
+
+		requestAnimationFrame(this.tick)
+	}
+
+	public startPlaying(onFinishedPlaying?: () => void) {
+		this.onFinishedPlaying = _.once(onFinishedPlaying || _.noop)
+		this.lastTickMs = Date.now()
+		this.playing = true
+		requestAnimationFrame(this.tick)
+	}
+}
+
+interface SequencerRendererProps {
+	onMount: (div: HTMLDivElement) => void
+}
+
+export class SequencerRenderer extends React.PureComponent<
+	SequencerRendererProps
+> {
 	private handleRef = (div: HTMLDivElement | null) => {
 		if (div) {
-			this.renderer = new SequencerRenderer(div)
-			this.props.onMount(this.renderer)
+			this.props.onMount(div)
 		}
 	}
 
@@ -337,38 +315,26 @@ export class SequenceRecorder extends React.PureComponent<
 > {
 	state: SequenceRecorderState = { recording: false }
 
-	private renderer: SequencerRenderer | undefined
+	private recorder: NewRecording | Recording | undefined
 
-	private handleMount = (renderer: SequencerRenderer) => {
-		this.renderer = renderer
+	private handleMount = (div: HTMLDivElement) => {
+		this.recorder = new NewRecording(div)
 	}
 
 	private handleStart = () => {
 		this.setState({ recording: true })
-		if (this.renderer) {
-			this.props.source.addListener(this.handleMidiNote)
-			this.renderer.startRecording(Date.now())
+		if (this.recorder && this.recorder instanceof NewRecording) {
+			this.recorder = this.recorder.startRecording(this.props.source)
 		}
 	}
 
 	private handleStop = () => {
 		this.setState({ recording: false })
-		this.props.source.removeListener(this.handleMidiNote)
-		if (this.renderer) {
-			this.renderer.stopRecording()
-			return this.renderer.state.events
+		if (this.recorder && this.recorder instanceof Recording) {
+			const events = this.recorder.stopRecording()
+			return events
 		}
 		return []
-	}
-
-	private handleMidiNote = (keyOn: boolean, midiNote: number) => {
-		if (this.renderer && this.renderer.startMs) {
-			this.renderer.handleEvent({
-				keyOn,
-				midiNote,
-				timeMs: Date.now() - this.renderer.startMs,
-			})
-		}
 	}
 
 	render() {
@@ -376,7 +342,9 @@ export class SequenceRecorder extends React.PureComponent<
 			recording: this.state.recording,
 			start: this.handleStart,
 			stop: this.handleStop,
-			sequencer: <Sequencer onMount={this.handleMount} />,
+			sequencer: (
+				<SequencerRenderer key="recorder" onMount={this.handleMount} />
+			),
 		})
 	}
 }
@@ -408,37 +376,36 @@ export class SequencePlayer extends React.PureComponent<
 		speed: 1,
 	}
 
-	private renderer: SequencerRenderer | undefined
+	private player: Player | undefined
 
-	private handleMount = (renderer: SequencerRenderer) => {
-		this.renderer = renderer
-		this.renderer.load(this.props.events)
+	private handleMount = (div: HTMLDivElement) => {
+		this.player = new Player(div, this.props.events)
 	}
 
 	private handlePlay = () => {
-		if (this.renderer) {
+		if (this.player) {
 			this.setState({
 				...this.state,
 				playing: true,
 			})
-			this.renderer.speed = this.state.speed
-			this.renderer.startPlaying(this.handleStop)
+			this.player.speed = this.state.speed
+			this.player.startPlaying(this.handleStop)
 		}
 	}
 
 	private handleStop = () => {
-		if (this.renderer) {
+		if (this.player) {
 			this.setState({
 				...this.state,
 				playing: false,
 			})
-			this.renderer.stopPlaying()
+			this.player.stopPlaying()
 		}
 	}
 
 	private handleRestart = () => {
-		if (this.renderer) {
-			this.renderer.resetScroll()
+		if (this.player) {
+			this.player.resetScroller()
 		}
 	}
 
@@ -448,8 +415,8 @@ export class SequencePlayer extends React.PureComponent<
 			...this.state,
 			speed,
 		})
-		if (this.renderer) {
-			this.renderer.speed = this.state.speed
+		if (this.player) {
+			this.player.speed = this.state.speed
 		}
 	}
 
@@ -461,7 +428,37 @@ export class SequencePlayer extends React.PureComponent<
 			restart: this.handleRestart,
 			speed: this.state.speed,
 			setSpeed: this.handleSpeedChange,
-			sequencer: <Sequencer onMount={this.handleMount} />,
+			sequencer: <SequencerRenderer key="player" onMount={this.handleMount} />,
 		})
 	}
+}
+
+function cleanMidiEvents(events: Array<MidiEvent>) {
+	const cleaned: Array<MidiEvent> = []
+
+	let startMs: number | undefined
+	let onNotes: Set<number> = new Set()
+	for (const { keyOn, midiNote, timeMs } of events) {
+		if (startMs === undefined) {
+			startMs = timeMs
+		}
+		if (keyOn) {
+			if (onNotes.has(midiNote)) {
+				// Handle key-repeat issues from computer keyboard.
+				continue
+			}
+			onNotes.add(midiNote)
+			// Normalize time.
+			cleaned.push({ keyOn, midiNote, timeMs: timeMs - startMs })
+		} else {
+			if (!onNotes.has(midiNote)) {
+				// Maybe recording started with a note down. Ignore it.
+				continue
+			}
+			onNotes.delete(midiNote)
+			cleaned.push({ keyOn, midiNote, timeMs: timeMs - startMs })
+		}
+	}
+
+	return cleaned
 }

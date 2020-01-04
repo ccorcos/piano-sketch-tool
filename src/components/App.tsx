@@ -242,7 +242,7 @@ export class App extends React.PureComponent<{}, AppState> {
 	// Events.
 	// ==============================================================
 
-	handleNewSketch() {
+	handleNewSketch = () => {
 		clearSongUrl()
 		this.setState({
 			...this.state,
