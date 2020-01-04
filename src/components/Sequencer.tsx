@@ -28,7 +28,7 @@ type IncompletedNote = {
 	elm: HTMLDivElement
 }
 
-type SequencerState = {
+type SequencerRecordingState = {
 	root: HTMLDivElement
 	completedNotes: Array<CompletedNote>
 	incompleteNotes: Array<IncompletedNote>
@@ -41,70 +41,124 @@ export type MidiEvent = {
 	timeMs: number
 }
 
-export class SequencerRenderer {
-	state: SequencerState
+type SequencerState = {
+	rootElm: HTMLDivElement
+	scrollerElm: HTMLDivElement
+	noteGuides: Record<number, HTMLDivElement>
+}
 
-	guides: { [midiNote: number]: HTMLDivElement } = {}
+type RecordingState = {
+	recording: boolean
+	sequencer: SequencerState
+	completedNotes: Array<CompletedNote>
+	incompleteNotes: Array<IncompletedNote>
+	events: Array<MidiEvent>
+}
+
+type PlayerState = {
+	playing: boolean
+	sequencer: SequencerState
+}
+
+function initSequencer(div: HTMLDivElement): SequencerState {
+	div.style.position = "absolute"
+	div.style.top = "0px"
+	div.style.left = "0px"
+	div.style.right = "0px"
+	div.style.height = "0px"
+
+	const noteGuides: Record<number, HTMLDivElement> = {}
+
+	for (let i = midiRange.start; i < midiRange.end; i++) {
+		// Create the light gray guide lines
+		if (i % 12 === 0 || i % 12 === 5) {
+			const makeGuide = () => {
+				const elm = document.createElement("div")
+				elm.style.position = "absolute"
+				elm.style.top = "0px"
+				elm.style.bottom = "0px"
+				elm.style.width = "2px"
+				elm.style.background = "#d0d0d0"
+				elm.style.left = `${getXPosition(i) - 2}px`
+				return elm
+			}
+			div.appendChild(makeGuide())
+			div.parentElement!.appendChild(makeGuide())
+		}
+
+		// Create note highlight guides
+		const makeNoteGuide = () => {
+			const elm = document.createElement("div")
+			elm.style.position = "absolute"
+			elm.style.top = "0px"
+			elm.style.bottom = "0px"
+			elm.style.width = isBlackNote(i)
+				? `${blackNoteWidth}px`
+				: `${whiteNoteWidth}px`
+			elm.style.background = isBlackNote(i) ? blackNoteColor : whiteNoteColor
+			elm.style.left = `${getXPosition(i)}px`
+			elm.style.opacity = 0 as any
+			noteGuides[i] = elm
+			return elm
+		}
+
+		div.appendChild(makeNoteGuide())
+	}
+
+	const scrollerElm = div.parentElement! as HTMLDivElement
+
+	return { noteGuides, rootElm: div, scrollerElm }
+}
+
+function initRecording(div: HTMLDivElement): RecordingState {
+	return {
+		sequencer: initSequencer(div),
+		recording: false,
+		completedNotes: [],
+		incompleteNotes: [],
+		events: [],
+	}
+}
+
+function initPlayer(div: HTMLDivElement): PlayerState {
+	return {
+		playing: false,
+		sequencer: initSequencer(div),
+		// completedNotes: [],
+		// incompleteNotes: [],
+		// events: [],
+	}
+}
+
+function startRecording() {}
+function stopRecording() {}
+
+function startPlaying() {}
+function stopPlaying() {}
+function restartPlayer() {}
+
+// TODO: need to rethink the Sequencer abstraction.
+// if (this.playMode) {
+// 	if (keyOn) {
+// 		this.guides[midiNote].style.opacity = 0.3 as any
+// 		console.log(this.guides[midiNote], "on")
+// 	} else {
+// 		this.guides[midiNote].style.opacity = 0.0 as any
+
+// 		console.log(this.guides[midiNote], "off")
+// 	}
+// }
+
+export class SequencerRenderer {
+	state: SequencerRecordingState
 
 	constructor(div: HTMLDivElement) {
-		div.style.position = "absolute"
-		div.style.top = "0px"
-		div.style.left = "0px"
-		div.style.right = "0px"
-		div.style.height = "0px"
+		initSequencer(div)
 		this.state = {
 			root: div,
 			completedNotes: [],
 			incompleteNotes: [],
 			events: [],
-		}
-
-		for (let i = midiRange.start; i < midiRange.end; i++) {
-			// Create the guides
-			if (i % 12 === 0 || i % 12 === 5) {
-				const makeGuide = () => {
-					const elm = document.createElement("div")
-					elm.style.position = "absolute"
-					elm.style.top = "0px"
-					elm.style.bottom = "0px"
-					elm.style.width = "2px"
-					elm.style.background = "#d0d0d0"
-					elm.style.left = `${getXPosition(i) - 2}px`
-					return elm
-				}
-				div.appendChild(makeGuide())
-				div.parentElement!.appendChild(makeGuide())
-			}
-
-			// Create note guides
-			const makeNoteGuide = () => {
-				const elm = document.createElement("div")
-				elm.style.position = "absolute"
-				elm.style.top = "0px"
-				elm.style.bottom = "0px"
-				elm.style.width = isBlackNote(i)
-					? `${blackNoteWidth}px`
-					: `${whiteNoteWidth}px`
-				elm.style.background = isBlackNote(i) ? blackNoteColor : whiteNoteColor
-				elm.style.left = `${getXPosition(i)}px`
-				elm.style.opacity = 0 as any
-				this.guides[i] = elm
-				return elm
-			}
-
-			div.appendChild(makeNoteGuide())
-
-			// TODO: need to rethink the Sequencer abstraction.
-			// if (this.playMode) {
-			// 	if (keyOn) {
-			// 		this.guides[midiNote].style.opacity = 0.3 as any
-			// 		console.log(this.guides[midiNote], "on")
-			// 	} else {
-			// 		this.guides[midiNote].style.opacity = 0.0 as any
-
-			// 		console.log(this.guides[midiNote], "off")
-			// 	}
-			// }
 		}
 	}
 
