@@ -156,6 +156,7 @@ export class App extends React.PureComponent<{}, AppState> {
 				<div style={{ margin: "2em auto", width: pianoWidth }}>
 					{this.renderTopbar()}
 					<SequencePlayer
+						source={this.source}
 						events={state.events}
 						render={({
 							playing,

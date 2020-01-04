@@ -21,10 +21,11 @@ The goal of this project is to create a tool for recording, learning, and sharin
 		// 		console.log(this.guides[midiNote], "off")
 		// 	}
 		// }
+		- MIDI device selector + refresh
 
-	- pervent default on space / enter
+	- prevent default on space / enter
 	- Gallery URI too long for Github.
-		- Deploy to now.sh?
+		- Deploy to now.sh? (test this out and tell Guillermo)
 		- better compression?
 	- wait mode -- wait for you to play all the notes before continuing.
 	- play the song aloud do you can hear it.

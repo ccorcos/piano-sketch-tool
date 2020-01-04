@@ -177,6 +177,13 @@ class Recording {
 	public stopRecording = () => {
 		this.source.removeListener(this.recordMidiEvent)
 		this.isRecording = false
+
+		const remainingNotes = this.sequencer.incompleteNotes.map(
+			({ midiNote }) => midiNote
+		)
+		for (const midiNote of remainingNotes) {
+			this.recordMidiEvent(false, midiNote)
+		}
 		return cleanMidiEvents(this.events)
 	}
 
@@ -259,6 +266,10 @@ class Player {
 		this.lastTickMs = Date.now()
 		this.playing = true
 		requestAnimationFrame(this.tick)
+	}
+
+	public highlightMidiNote = (keyOn: boolean, midiNote: number) => {
+		this.sequencer.noteGuides[midiNote].style.opacity = keyOn ? "0.3" : "0"
 	}
 }
 
@@ -350,6 +361,7 @@ export class SequenceRecorder extends React.PureComponent<
 }
 
 interface SequencePlayerProps {
+	source: MidiSource
 	events: Array<MidiEvent>
 	render: (props: {
 		playing: boolean
@@ -375,11 +387,17 @@ export class SequencePlayer extends React.PureComponent<
 		playing: false,
 		speed: 1,
 	}
-
 	private player: Player | undefined
+
+	componentWillUnmount() {
+		if (this.player) {
+			this.props.source.addListener(this.player.highlightMidiNote)
+		}
+	}
 
 	private handleMount = (div: HTMLDivElement) => {
 		this.player = new Player(div, this.props.events)
+		this.props.source.addListener(this.player.highlightMidiNote)
 	}
 
 	private handlePlay = () => {
@@ -440,7 +458,7 @@ function cleanMidiEvents(events: Array<MidiEvent>) {
 	let onNotes: Set<number> = new Set()
 	for (const { keyOn, midiNote, timeMs } of events) {
 		if (startMs === undefined) {
-			startMs = timeMs
+			startMs = timeMs - 1000
 		}
 		if (keyOn) {
 			if (onNotes.has(midiNote)) {

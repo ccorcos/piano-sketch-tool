@@ -8,22 +8,20 @@ async function playSong() {
 	// Set up a new output.
 	const output = new midi.Output()
 
-	function sendNote(midiNote, timeMs) {
+	async function sendNote(midiNote, timeMs) {
 		output.sendMessage([144, midiNote, 1])
 		console.log("T", midiNote)
-		setTimeout(() => {
-			output.sendMessage([128, midiNote, 1])
-			console.log("F", midiNote)
-		}, timeMs)
+		await wait(timeMs)
+		console.log("F", midiNote)
+		output.sendMessage([128, midiNote, 1])
 	}
 
 	output.openVirtualPort("Roland Patch")
 
 	while (true) {
-		sendNote(40, 600)
-		await wait(600 + 200)
-		sendNote(45, 600)
-		await wait(600 + 200)
+		const note = Math.floor(Math.random() * 60 + 21)
+		await sendNote(note, 600)
+		await wait(200)
 	}
 	// Close the port when done.
 	output.closePort()
