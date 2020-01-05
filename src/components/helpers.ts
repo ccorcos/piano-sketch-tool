@@ -1,4 +1,4 @@
-export const sequencerHeight = 400
+export const sequencerHeight = 600
 export const pixelsPerMillisecond = sequencerHeight / 2500
 export const whiteNoteWidth = 20
 export const whiteNoteHeight = 80
