@@ -8,11 +8,10 @@ The goal of this project is to create a tool for recording, learning, and sharin
 ## To-Do
 
 - Features
-	- play the song aloud so you can hear it.
 	- wait mode -- wait for you to play all the notes before continuing.
-	- even slower mode -- maybe it log(N) in the slide?
-	- trim the beginning of the song to one second of lead-in.
 	- empty recording should not redirect to player
+
+	- history forward/back navigation
 
 	- ui stuff
 		- time elapsed
@@ -25,8 +24,6 @@ The goal of this project is to create a tool for recording, learning, and sharin
 
 	- select and loop a section
 
-- Bugs
-	- history forward/back navigation
 
 ## Designs
 
