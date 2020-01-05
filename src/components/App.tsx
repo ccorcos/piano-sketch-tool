@@ -54,6 +54,24 @@ export class App extends React.PureComponent<{}, AppState> {
 				<button style={{ marginRight: 4 }} onClick={this.handleNewSketch}>
 					New Sketch (N)
 				</button>
+
+				<button style={{ marginLeft: 4 }}>
+					<a
+						target="_blank"
+						href="https://github.com/ccorcos/piano-sketch-tool/blob/master/GALLERY.md"
+					>
+						Gallery
+					</a>
+				</button>
+				<button style={{ marginLeft: 4 }}>
+					<a
+						target="_blank"
+						href="https://www.github.com/ccorcos/piano-sketch-tool"
+					>
+						Source Code
+					</a>
+				</button>
+
 				{/* <button style={{ marginRight: 4 }}>Open Sketch (O)</button> */}
 
 				<div style={{ fontSize: 14, float: "right", display: "flex" }}>
@@ -61,12 +79,6 @@ export class App extends React.PureComponent<{}, AppState> {
 					<MidiSynth midi={this.midiInstrument} label={"Instrument Sound: "} />
 				</div>
 
-				<a
-					style={{ fontSize: 14, position: "fixed", bottom: 12, right: 16 }}
-					href="https://www.github.com/ccorcos/piano-sketch-tool"
-				>
-					source code
-				</a>
 				<KeyboardShorcuts
 					keydown={key => {
 						if (key === "n") {
