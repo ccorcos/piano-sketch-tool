@@ -1,10 +1,11 @@
 import * as React from "react"
 import { Piano } from "./Piano"
 import { pianoWidth } from "./helpers"
-import { MidiEmitter, MidiSelector } from "./Midi"
+import { MidiEmitter, MidiSelector } from "./MidiInstrument"
 import { SequenceRecorder, MidiEvent, SequencePlayer } from "./Sequencer"
 import { clearSongUrl, getSongUrl } from "./routeHelpers"
 import { KeyboardShorcuts } from "./KeyboardShorcuts"
+import { MidiSynth } from "./MidiSynth"
 
 const border = "1px solid #B8B8B8"
 
@@ -53,8 +54,9 @@ export class App extends React.PureComponent<{}, AppState> {
 				</button>
 				{/* <button style={{ marginRight: 4 }}>Open Sketch (O)</button> */}
 
-				<div style={{ fontSize: 14, float: "right" }}>
+				<div style={{ fontSize: 14, float: "right", display: "flex" }}>
 					<MidiSelector midi={this.midi} />
+					<MidiSynth midi={this.midi} />
 				</div>
 
 				<a

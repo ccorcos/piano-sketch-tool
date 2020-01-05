@@ -12,7 +12,7 @@ import {
 	pianoWidth,
 	midiRange,
 } from "./helpers"
-import { MidiEmitter } from "./Midi"
+import { MidiEmitter } from "./MidiInstrument"
 import { setSongUrl } from "./routeHelpers"
 
 type CompletedNote = {

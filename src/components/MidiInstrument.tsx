@@ -50,7 +50,7 @@ export class MidiEmitter {
 	}
 }
 
-export class ComputerMidiSource {
+export class ComputerMidiInstrument {
 	constructor(private emitter: MidiEmitter) {}
 
 	start() {
@@ -63,12 +63,17 @@ export class ComputerMidiSource {
 		window.removeEventListener("keyup", this.handleKeyUp)
 	}
 
+	keys: Set<number> = new Set()
+
 	private handleKeyDown = (event: KeyboardEvent) => {
 		if (event.key in keyMap) {
 			// event.preventDefault()
 			// event.stopPropagation()
-			const midiNote = keyMap[event.key] + 48
-			this.emitter.emit(true, midiNote)
+			const midiNote = keyMap[event.key] + 60
+			if (!this.keys.has(midiNote)) {
+				this.keys.add(midiNote)
+				this.emitter.emit(true, midiNote)
+			}
 		}
 	}
 
@@ -76,8 +81,11 @@ export class ComputerMidiSource {
 		if (event.key in keyMap) {
 			// event.preventDefault()
 			// event.stopPropagation()
-			const midiNote = keyMap[event.key] + 48
-			this.emitter.emit(false, midiNote)
+			const midiNote = keyMap[event.key] + 60
+			if (this.keys.has(midiNote)) {
+				this.keys.delete(midiNote)
+				this.emitter.emit(false, midiNote)
+			}
 		}
 	}
 }
@@ -105,10 +113,10 @@ export class MidiSelector extends React.PureComponent<
 		inputs: [],
 	}
 
-	keyboard: ComputerMidiSource
+	keyboard: ComputerMidiInstrument
 	constructor(props) {
 		super(props)
-		this.keyboard = new ComputerMidiSource(props.midi)
+		this.keyboard = new ComputerMidiInstrument(props.midi)
 		this.keyboard.start()
 		this.initializeMidi()
 	}
