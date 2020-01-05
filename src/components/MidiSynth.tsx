@@ -16,7 +16,9 @@ const startTone = _.once(() => {
 	Tone.start()
 	return new Tone.PolySynth(10, Tone.Synth, {
 		oscillator: { type: "sine" },
-	}).toMaster()
+		// Soften the sound a bit so it doesn't clip
+		envelope: { attack: 0.05, decay: 0.1, sustain: 0.8, release: 0.25 },
+	}).chain(new Tone.Volume(-12), Tone.Master)
 })
 
 export class MidiSynth extends React.PureComponent<
@@ -30,6 +32,7 @@ export class MidiSynth extends React.PureComponent<
 	private handleToggleSound = e => {
 		if (this.state.on) {
 			this.setState({ on: false })
+			this.props.midi.clear()
 			this.props.midi.removeListener(this.handleMidiNote)
 		} else {
 			this.setState({ on: true })
