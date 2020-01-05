@@ -9,8 +9,8 @@ The goal of this project is to create a tool for recording, learning, and sharin
 
 - Features
 	- Gallery URI too long for Github.
-		- Deploy to now.sh? (test this out and tell Guillermo)
-		- better compression?
+		- max length
+		- don't redirect when no recording happened.
 	- wait mode -- wait for you to play all the notes before continuing.
 	- play the song aloud do you can hear it.
 	- even slower mode -- maybe it log(N) in the slide?

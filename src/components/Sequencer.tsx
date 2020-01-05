@@ -452,8 +452,20 @@ export class SequencePlayer extends React.PureComponent<
 	}
 }
 
+const maxEvents = 1150
+
 function cleanMidiEvents(events: Array<MidiEvent>) {
 	const cleaned: Array<MidiEvent> = []
+
+	let extras: Array<MidiEvent> = []
+	if (events.length > maxEvents) {
+		extras = events.slice(maxEvents)
+		events = events.slice(0, maxEvents)
+		alert(
+			`You song was more than ${maxEvents /
+				2} notes which will not fit into a URL so it has been truncated.`
+		)
+	}
 
 	let startMs: number | undefined
 	let onNotes: Set<number> = new Set()
@@ -476,6 +488,13 @@ function cleanMidiEvents(events: Array<MidiEvent>) {
 			}
 			onNotes.delete(midiNote)
 			cleaned.push({ keyOn, midiNote, timeMs: timeMs - startMs })
+		}
+	}
+	// Close off any notes that are held down.
+	for (const { keyOn, midiNote, timeMs } of extras) {
+		if (keyOn === false && onNotes.has(midiNote)) {
+			onNotes.delete(midiNote)
+			cleaned.push({ keyOn, midiNote, timeMs: timeMs - startMs! })
 		}
 	}
 
