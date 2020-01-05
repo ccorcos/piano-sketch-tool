@@ -24,6 +24,7 @@ type AppState =
 export class App extends React.PureComponent<{}, AppState> {
 	state: AppState = { type: "recording" as const, keys: new Set<number>() }
 	midiInstrument = new MidiEmitter()
+	midiPlayback = new MidiEmitter()
 
 	constructor(props) {
 		super(props)
@@ -57,7 +58,7 @@ export class App extends React.PureComponent<{}, AppState> {
 
 				<div style={{ fontSize: 14, float: "right", display: "flex" }}>
 					<MidiSelector midiInstrument={this.midiInstrument} />
-					<MidiSynth midiInstrument={this.midiInstrument} />
+					<MidiSynth midi={this.midiInstrument} label={"Instrument Sound: "} />
 				</div>
 
 				<a
@@ -165,6 +166,7 @@ export class App extends React.PureComponent<{}, AppState> {
 			return (
 				<SequencePlayer
 					midiInstrument={this.midiInstrument}
+					midiPlayback={this.midiPlayback}
 					events={state.events}
 					render={({
 						playing,
@@ -197,9 +199,12 @@ export class App extends React.PureComponent<{}, AppState> {
 									</button>
 								)}
 
-								<span style={{ fontSize: 14, float: "right" }}>
-									Share this link with a friend!
-								</span>
+								<div style={{ fontSize: 14, float: "right", display: "flex" }}>
+									<MidiSynth
+										midi={this.midiPlayback}
+										label={"Playback Sound: "}
+									/>
+								</div>
 
 								<button onClick={restart}>Restart (ENTER)</button>
 

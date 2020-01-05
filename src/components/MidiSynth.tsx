@@ -4,12 +4,20 @@ import * as _ from "lodash"
 import { MidiEmitter } from "./MidiEmitter"
 
 interface MidiSoundProps {
-	midiInstrument: MidiEmitter
+	midi: MidiEmitter
+	label: string
 }
 
 interface MidiSoundState {
 	on: boolean
 }
+
+const startTone = _.once(() => {
+	Tone.start()
+	return new Tone.PolySynth(10, Tone.Synth, {
+		oscillator: { type: "sine" },
+	}).toMaster()
+})
 
 export class MidiSynth extends React.PureComponent<
 	MidiSoundProps,
@@ -19,21 +27,14 @@ export class MidiSynth extends React.PureComponent<
 
 	synth: any
 
-	private startTone = _.once(() => {
-		Tone.start()
-		this.synth = new Tone.PolySynth(10, Tone.Synth, {
-			oscillator: { type: "sine" },
-		}).toMaster()
-	})
-
 	private handleToggleSound = e => {
 		if (this.state.on) {
 			this.setState({ on: false })
-			this.props.midiInstrument.removeListener(this.handleMidiNote)
+			this.props.midi.removeListener(this.handleMidiNote)
 		} else {
 			this.setState({ on: true })
-			this.startTone()
-			this.props.midiInstrument.addListener(this.handleMidiNote)
+			this.synth = startTone()
+			this.props.midi.addListener(this.handleMidiNote)
 		}
 	}
 
@@ -50,8 +51,8 @@ export class MidiSynth extends React.PureComponent<
 	render() {
 		return (
 			<div style={{ marginLeft: 8 }}>
-				<span>Instrument Sound: </span>
-				<button onClick={this.handleToggleSound}>
+				<span>{this.props.label}</span>
+				<button style={{ width: 60 }} onClick={this.handleToggleSound}>
 					{this.state.on ? "Turn Off" : "Turn On"}
 				</button>
 			</div>

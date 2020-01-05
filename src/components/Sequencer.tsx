@@ -210,14 +210,20 @@ class Recording {
 class Player {
 	public sequencer: Sequencer
 	public events: Array<MidiEvent>
+	public midiPlayback: MidiEmitter
 
 	public resetScroller() {
 		this.sequencer.scrollerElm.scrollTop = this.sequencer.scrollerElm.scrollHeight
 	}
 
-	constructor(div: HTMLDivElement, events: Array<MidiEvent>) {
+	constructor(
+		div: HTMLDivElement,
+		events: Array<MidiEvent>,
+		midiPlayback: MidiEmitter
+	) {
 		this.sequencer = new Sequencer(div)
 		this.events = events
+		this.midiPlayback = midiPlayback
 
 		for (const event of events) {
 			this.sequencer.renderMidiNote(event)
@@ -242,21 +248,51 @@ class Player {
 		this.playing = false
 	}
 
+	private scrollTopToPxToMs = (scrollTop: number) => {
+		return (
+			(this.sequencer.scrollerElm.scrollHeight - sequencerHeight - scrollTop) /
+			pixelsPerMillisecond
+		)
+	}
+
+	private msToScrollTopPx = (timeMs: number) => {
+		return Math.round(
+			this.sequencer.scrollerElm.scrollHeight -
+				sequencerHeight -
+				timeMs * pixelsPerMillisecond
+		)
+	}
+
 	private tick = () => {
 		if (!this.playing) {
-			return
-		}
-		if (this.sequencer.scrollerElm.scrollTop <= 0) {
-			this.stopPlaying()
-			this.onFinishedPlaying()
 			return
 		}
 		const dt = Date.now() - this.lastTickMs
 		this.lastTickMs = Date.now()
 
-		this.sequencer.scrollerElm.scrollTop =
-			this.sequencer.scrollerElm.scrollTop -
-			pixelsPerMillisecond * dt * this.speed
+		const currentTime = this.scrollTopToPxToMs(
+			this.sequencer.scrollerElm.scrollTop
+		)
+
+		// Recompute next time from truncated scrollTop because fractional scroll
+		// positions aren't allowed.
+		const nextTime = this.scrollTopToPxToMs(
+			this.msToScrollTopPx(currentTime + dt * this.speed)
+		)
+
+		for (const event of this.events) {
+			if (event.timeMs >= currentTime && event.timeMs < nextTime) {
+				this.midiPlayback.emit(event.keyOn, event.midiNote)
+			}
+		}
+
+		this.sequencer.scrollerElm.scrollTop = this.msToScrollTopPx(nextTime)
+
+		if (this.sequencer.scrollerElm.scrollTop <= 0) {
+			this.stopPlaying()
+			this.onFinishedPlaying()
+			return
+		}
 
 		requestAnimationFrame(this.tick)
 	}
@@ -362,6 +398,7 @@ export class SequenceRecorder extends React.PureComponent<
 
 interface SequencePlayerProps {
 	midiInstrument: MidiEmitter
+	midiPlayback: MidiEmitter
 	events: Array<MidiEvent>
 	render: (props: {
 		playing: boolean
@@ -396,7 +433,7 @@ export class SequencePlayer extends React.PureComponent<
 	}
 
 	private handleMount = (div: HTMLDivElement) => {
-		this.player = new Player(div, this.props.events)
+		this.player = new Player(div, this.props.events, this.props.midiPlayback)
 		this.props.midiInstrument.addListener(this.player.highlightMidiNote)
 	}
 
