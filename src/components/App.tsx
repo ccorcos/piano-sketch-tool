@@ -58,7 +58,7 @@ export class App extends React.PureComponent<{}, AppState> {
 				</div>
 
 				<a
-					style={{ fontSize: 14, position: "absolute", bottom: 12, right: 16 }}
+					style={{ fontSize: 14, position: "fixed", bottom: 12, right: 16 }}
 					href="https://www.github.com/ccorcos/piano-sketch-tool"
 				>
 					source code
@@ -78,104 +78,103 @@ export class App extends React.PureComponent<{}, AppState> {
 	}
 
 	render() {
+		return (
+			<div style={{ margin: "2em auto", width: pianoWidth }}>
+				{this.renderTopbar()}
+				{this.renderInner()}
+			</div>
+		)
+	}
+
+	renderInner() {
 		const state = this.state
 		if (state.type === "recording") {
 			return (
-				<div style={{ margin: "2em auto", width: pianoWidth }}>
-					<SequenceRecorder
-						midi={this.midi}
-						render={({ recording, start, stop, sequencer }) => {
-							const handleStop = () => {
-								const events = stop()
-								this.setState({
-									...this.state,
-									type: "loaded",
-									events,
-								})
-							}
-							const handleRecord = () => {
-								start()
-								this.setState({
-									...this.state,
-									type: "recording",
-								})
-							}
-							return (
-								<div>
-									{this.renderTopbar()}
-
-									<div style={{ marginBottom: 12 }}>
-										{/* <div>
+				<SequenceRecorder
+					midi={this.midi}
+					render={({ recording, start, stop, sequencer }) => {
+						const handleStop = () => {
+							const events = stop()
+							this.setState({
+								...this.state,
+								type: "loaded",
+								events,
+							})
+						}
+						const handleRecord = () => {
+							start()
+							this.setState({
+								...this.state,
+								type: "recording",
+							})
+						}
+						return (
+							<div>
+								<div style={{ marginBottom: 12 }}>
+									{/* <div>
 											<input
 												style={{ marginBottom: 4 }}
 												placeholder="Untitled Sketch"
 											></input>
 										</div> */}
 
-										{recording ? (
+									{recording ? (
+										<button
+											style={{ marginRight: 4, marginBottom: 16 }}
+											onClick={handleStop}
+										>
+											Stop (SPACE)
+										</button>
+									) : (
+										<>
 											<button
 												style={{ marginRight: 4, marginBottom: 16 }}
-												onClick={handleStop}
+												onClick={handleRecord}
 											>
-												Stop (SPACE)
+												Record (SPACE)
 											</button>
-										) : (
-											<>
-												<button
-													style={{ marginRight: 4, marginBottom: 16 }}
-													onClick={handleRecord}
-												>
-													Record (SPACE)
-												</button>
-												<span style={{ fontSize: 14, float: "right" }}>
-													Connect a Midi device and you should see notes
-													highlighted below.
-												</span>
-											</>
-										)}
+										</>
+									)}
 
-										<KeyboardShorcuts
-											keydown={key => {
-												if (key === " ") {
-													if (recording) {
-														handleStop()
-														return true
-													} else {
-														handleRecord()
-														return true
-													}
+									<KeyboardShorcuts
+										keydown={key => {
+											if (key === " ") {
+												if (recording) {
+													handleStop()
+													return true
+												} else {
+													handleRecord()
+													return true
 												}
-											}}
-										/>
-									</div>
-
-									<Piano highlight={state.keys} />
-									{sequencer}
+											}
+										}}
+									/>
 								</div>
-							)
-						}}
-					/>
-				</div>
+
+								<Piano highlight={state.keys} />
+								{sequencer}
+							</div>
+						)
+					}}
+				/>
 			)
 		} else {
 			return (
-				<div style={{ margin: "2em auto", width: pianoWidth }}>
-					{this.renderTopbar()}
-					<SequencePlayer
-						midi={this.midi}
-						events={state.events}
-						render={({
-							playing,
-							play,
-							pause,
-							restart,
-							sequencer,
-							speed,
-							setSpeed,
-						}) => (
-							<div>
-								<div style={{ marginBottom: 12 }}>
-									{/* <div>
+				<SequencePlayer
+					midi={this.midi}
+					events={state.events}
+					render={({
+						playing,
+						play,
+						pause,
+						restart,
+						sequencer,
+						speed,
+						setSpeed,
+					}) => (
+						<div>
+							<div style={{ marginBottom: 12 }}>
+								{/* <div>
 										<input
 											style={{ marginBottom: 4 }}
 											placeholder="Untitled Sketch"
@@ -185,66 +184,61 @@ export class App extends React.PureComponent<{}, AppState> {
 										</span>
 									</div> */}
 
-									{playing ? (
-										<button style={{ width: 100 }} onClick={pause}>
-											Pause (SPACE)
-										</button>
-									) : (
-										<button style={{ width: 100 }} onClick={play}>
-											Play (SPACE)
-										</button>
-									)}
+								{playing ? (
+									<button style={{ width: 100 }} onClick={pause}>
+										Pause (SPACE)
+									</button>
+								) : (
+									<button style={{ width: 100 }} onClick={play}>
+										Play (SPACE)
+									</button>
+								)}
 
-									<span style={{ fontSize: 14, float: "right" }}>
-										Share this link with a friend!
-									</span>
+								<span style={{ fontSize: 14, float: "right" }}>
+									Share this link with a friend!
+								</span>
 
-									<button onClick={restart}>Restart (ENTER)</button>
+								<button onClick={restart}>Restart (ENTER)</button>
 
-									<KeyboardShorcuts
-										keydown={key => {
-											if (key === " ") {
-												if (playing) {
-													pause()
-												} else {
-													play()
-												}
-												return true
-											} else if (key === "Enter") {
-												restart()
-												return true
-											} else if (key === "ArrowRight") {
-												setSpeed(speed + 0.25)
-												return true
-											} else if (key === "ArrowLeft") {
-												setSpeed(speed - 0.25)
-												return true
+								<KeyboardShorcuts
+									keydown={key => {
+										if (key === " ") {
+											if (playing) {
+												pause()
+											} else {
+												play()
 											}
-										}}
-									/>
+											return true
+										} else if (key === "Enter") {
+											restart()
+											return true
+										} else if (key === "ArrowRight") {
+											setSpeed(speed + 0.25)
+											return true
+										} else if (key === "ArrowLeft") {
+											setSpeed(speed - 0.25)
+											return true
+										}
+									}}
+								/>
 
-									<div style={{ display: "inline-flex" }}>
-										<span style={{ margin: "0 4px", fontSize: 14 }}>
-											Speed:
-										</span>
-										<input
-											type="range"
-											min="0"
-											max="300"
-											value={speed * 100}
-											onChange={(e: any) => setSpeed(e.target.value / 100)}
-										/>
-										<span style={{ margin: "0 4px", fontSize: 14 }}>
-											{speed}
-										</span>
-									</div>
+								<div style={{ display: "inline-flex" }}>
+									<span style={{ margin: "0 4px", fontSize: 14 }}>Speed:</span>
+									<input
+										type="range"
+										min="0"
+										max="300"
+										value={speed * 100}
+										onChange={(e: any) => setSpeed(e.target.value / 100)}
+									/>
+									<span style={{ margin: "0 4px", fontSize: 14 }}>{speed}</span>
 								</div>
-								{sequencer}
-								<Piano highlight={state.keys} />
 							</div>
-						)}
-					/>
-				</div>
+							{sequencer}
+							<Piano highlight={state.keys} />
+						</div>
+					)}
+				/>
 			)
 		}
 	}

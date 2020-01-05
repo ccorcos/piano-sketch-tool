@@ -391,7 +391,7 @@ export class SequencePlayer extends React.PureComponent<
 
 	componentWillUnmount() {
 		if (this.player) {
-			this.props.midi.addListener(this.player.highlightMidiNote)
+			this.props.midi.removeListener(this.player.highlightMidiNote)
 		}
 	}
 

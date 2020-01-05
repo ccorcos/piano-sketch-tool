@@ -16,7 +16,7 @@ async function playSong() {
 		output.sendMessage([128, midiNote, 1])
 	}
 
-	output.openVirtualPort("Roland Patch")
+	output.openVirtualPort("Midi Simulator")
 
 	while (true) {
 		const note = Math.floor(Math.random() * 60 + 21)

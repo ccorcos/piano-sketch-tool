@@ -65,18 +65,18 @@ export class ComputerMidiSource {
 
 	private handleKeyDown = (event: KeyboardEvent) => {
 		if (event.key in keyMap) {
-			event.preventDefault()
-			event.stopPropagation()
-			const midiNote = keyMap[event.key] + 36
+			// event.preventDefault()
+			// event.stopPropagation()
+			const midiNote = keyMap[event.key] + 48
 			this.emitter.emit(true, midiNote)
 		}
 	}
 
 	private handleKeyUp = (event: KeyboardEvent) => {
 		if (event.key in keyMap) {
-			event.preventDefault()
-			event.stopPropagation()
-			const midiNote = keyMap[event.key] + 36
+			// event.preventDefault()
+			// event.stopPropagation()
+			const midiNote = keyMap[event.key] + 48
 			this.emitter.emit(false, midiNote)
 		}
 	}
@@ -147,6 +147,7 @@ export class MidiSelector extends React.PureComponent<
 
 	private handleMidiMessage = (name: string, msg) => {
 		if (this.state.selector === name) {
+			console.log("midi", name, this.state.selector)
 			const [command, note] = msg.data
 			if (command === 144) {
 				// console.log("T", note)
@@ -167,7 +168,8 @@ export class MidiSelector extends React.PureComponent<
 		const m = await n.requestMIDIAccess()
 		const inputs = Array.from(m.inputs.values()) as Array<MidiInput>
 		for (const input of inputs) {
-			input.onmidimessage = msg => this.handleMidiMessage(input.name, msg)
+			const inputName = input.name
+			input.onmidimessage = msg => this.handleMidiMessage(inputName, msg)
 		}
 		this.setState({
 			...this.state,
