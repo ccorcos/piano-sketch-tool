@@ -38,3 +38,5 @@ You can test out this program without connecting to a MIDI device by running the
 ```sh
 node src/midi-simulator.js
 ```
+
+Deploys run automatically through [Now.sh](https://zeit.co/ccorcos/piano-sketch-tool).
