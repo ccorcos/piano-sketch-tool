@@ -231,6 +231,7 @@ class Player {
 		this.sequencer.scrollerElm.scrollTop = height
 
 		setSongUrl(events)
+		console.log("events", events.length)
 	}
 
 	private playing = false
