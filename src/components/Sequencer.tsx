@@ -243,9 +243,12 @@ class Player {
 	public speed = 1
 	private onFinishedPlaying = _.noop
 	private lastTickMs: number
+	private lastScrollTop: number
 
 	public stopPlaying() {
 		this.playing = false
+		this.sequencer.scrollerElm.style.overflow = "auto"
+		this.midiPlayback.clear()
 	}
 
 	private scrollTopToPxToMs = (scrollTop: number) => {
@@ -256,10 +259,10 @@ class Player {
 	}
 
 	private msToScrollTopPx = (timeMs: number) => {
-		return Math.round(
+		return (
 			this.sequencer.scrollerElm.scrollHeight -
-				sequencerHeight -
-				timeMs * pixelsPerMillisecond
+			sequencerHeight -
+			timeMs * pixelsPerMillisecond
 		)
 	}
 
@@ -270,15 +273,11 @@ class Player {
 		const dt = Date.now() - this.lastTickMs
 		this.lastTickMs = Date.now()
 
-		const currentTime = this.scrollTopToPxToMs(
-			this.sequencer.scrollerElm.scrollTop
-		)
+		const currentTime = this.scrollTopToPxToMs(this.lastScrollTop)
 
 		// Recompute next time from truncated scrollTop because fractional scroll
 		// positions aren't allowed.
-		const nextTime = this.scrollTopToPxToMs(
-			this.msToScrollTopPx(currentTime + dt * this.speed)
-		)
+		const nextTime = currentTime + dt * this.speed
 
 		for (const event of this.events) {
 			if (event.timeMs >= currentTime && event.timeMs < nextTime) {
@@ -286,9 +285,10 @@ class Player {
 			}
 		}
 
-		this.sequencer.scrollerElm.scrollTop = this.msToScrollTopPx(nextTime)
+		this.lastScrollTop = this.msToScrollTopPx(nextTime)
+		this.sequencer.scrollerElm.scrollTop = this.lastScrollTop
 
-		if (this.sequencer.scrollerElm.scrollTop <= 0) {
+		if (this.lastScrollTop <= 0) {
 			this.stopPlaying()
 			this.onFinishedPlaying()
 			return
@@ -300,6 +300,8 @@ class Player {
 	public startPlaying(onFinishedPlaying?: () => void) {
 		this.onFinishedPlaying = _.once(onFinishedPlaying || _.noop)
 		this.lastTickMs = Date.now()
+		this.lastScrollTop = this.sequencer.scrollerElm.scrollTop
+		this.sequencer.scrollerElm.style.overflow = "hidden"
 		this.playing = true
 		requestAnimationFrame(this.tick)
 	}
