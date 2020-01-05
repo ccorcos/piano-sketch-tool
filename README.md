@@ -8,7 +8,6 @@ The goal of this project is to create a tool for recording, learning, and sharin
 ## To-Do
 
 - Features
-	- MIDI device selector + refresh
 	- Gallery URI too long for Github.
 		- Deploy to now.sh? (test this out and tell Guillermo)
 		- better compression?
