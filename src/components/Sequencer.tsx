@@ -12,7 +12,7 @@ import {
 	pianoWidth,
 	midiRange,
 } from "./helpers"
-import { MidiSource } from "./MidiSource"
+import { MidiEmitter } from "./Midi"
 import { setSongUrl } from "./routeHelpers"
 
 type CompletedNote = {
@@ -151,8 +151,8 @@ class Sequencer {
 class NewRecording {
 	public sequencer: Sequencer
 
-	public startRecording(source: MidiSource) {
-		return new Recording(this, source)
+	public startRecording(midi: MidiEmitter) {
+		return new Recording(this, midi)
 	}
 
 	constructor(div: HTMLDivElement) {
@@ -175,7 +175,7 @@ class Recording {
 	}
 
 	public stopRecording = () => {
-		this.source.removeListener(this.recordMidiEvent)
+		this.midi.removeListener(this.recordMidiEvent)
 		this.isRecording = false
 
 		const remainingNotes = this.sequencer.incompleteNotes.map(
@@ -187,11 +187,11 @@ class Recording {
 		return cleanMidiEvents(this.events)
 	}
 
-	private source: MidiSource
-	constructor(state: NewRecording, source: MidiSource) {
+	private midi: MidiEmitter
+	constructor(state: NewRecording, midi: MidiEmitter) {
 		this.sequencer = state.sequencer
-		this.source = source
-		this.source.addListener(this.recordMidiEvent)
+		this.midi = midi
+		this.midi.addListener(this.recordMidiEvent)
 		requestAnimationFrame(this.tick)
 	}
 
@@ -307,7 +307,7 @@ export class SequencerRenderer extends React.PureComponent<
 }
 
 interface SequenceRecorderProps {
-	source: MidiSource
+	midi: MidiEmitter
 	render: (props: {
 		recording: boolean
 		start: () => void
@@ -335,7 +335,7 @@ export class SequenceRecorder extends React.PureComponent<
 	private handleStart = () => {
 		this.setState({ recording: true })
 		if (this.recorder && this.recorder instanceof NewRecording) {
-			this.recorder = this.recorder.startRecording(this.props.source)
+			this.recorder = this.recorder.startRecording(this.props.midi)
 		}
 	}
 
@@ -361,7 +361,7 @@ export class SequenceRecorder extends React.PureComponent<
 }
 
 interface SequencePlayerProps {
-	source: MidiSource
+	midi: MidiEmitter
 	events: Array<MidiEvent>
 	render: (props: {
 		playing: boolean
@@ -391,13 +391,13 @@ export class SequencePlayer extends React.PureComponent<
 
 	componentWillUnmount() {
 		if (this.player) {
-			this.props.source.addListener(this.player.highlightMidiNote)
+			this.props.midi.addListener(this.player.highlightMidiNote)
 		}
 	}
 
 	private handleMount = (div: HTMLDivElement) => {
 		this.player = new Player(div, this.props.events)
-		this.props.source.addListener(this.player.highlightMidiNote)
+		this.props.midi.addListener(this.player.highlightMidiNote)
 	}
 
 	private handlePlay = () => {

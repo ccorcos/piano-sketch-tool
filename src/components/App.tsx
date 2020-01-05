@@ -1,7 +1,7 @@
 import * as React from "react"
 import { Piano } from "./Piano"
 import { pianoWidth } from "./helpers"
-import { WebMidiSource } from "./MidiSource"
+import { MidiEmitter, MidiSelector } from "./Midi"
 import { SequenceRecorder, MidiEvent, SequencePlayer } from "./Sequencer"
 import { clearSongUrl, getSongUrl } from "./routeHelpers"
 import { KeyboardShorcuts } from "./KeyboardShorcuts"
@@ -21,7 +21,7 @@ type AppState =
 
 export class App extends React.PureComponent<{}, AppState> {
 	state: AppState = { type: "recording" as const, keys: new Set<number>() }
-	source = new WebMidiSource()
+	midi = new MidiEmitter()
 
 	constructor(props) {
 		super(props)
@@ -36,12 +36,11 @@ export class App extends React.PureComponent<{}, AppState> {
 	}
 
 	componentWillMount() {
-		this.source.start()
-		this.source.addListener(this.handleMidiNote)
+		this.midi.addListener(this.handleMidiNote)
 	}
 
 	componentWillUnmount() {
-		this.source.stop()
+		this.midi.removeListener(this.handleMidiNote)
 	}
 
 	renderTopbar() {
@@ -54,8 +53,12 @@ export class App extends React.PureComponent<{}, AppState> {
 				</button>
 				{/* <button style={{ marginRight: 4 }}>Open Sketch (O)</button> */}
 
+				<div style={{ fontSize: 14, float: "right" }}>
+					<MidiSelector midi={this.midi} />
+				</div>
+
 				<a
-					style={{ fontSize: 14, float: "right" }}
+					style={{ fontSize: 14, position: "absolute", bottom: 12, right: 16 }}
 					href="https://www.github.com/ccorcos/piano-sketch-tool"
 				>
 					source code
@@ -80,7 +83,7 @@ export class App extends React.PureComponent<{}, AppState> {
 			return (
 				<div style={{ margin: "2em auto", width: pianoWidth }}>
 					<SequenceRecorder
-						source={this.source}
+						midi={this.midi}
 						render={({ recording, start, stop, sequencer }) => {
 							const handleStop = () => {
 								const events = stop()
@@ -159,7 +162,7 @@ export class App extends React.PureComponent<{}, AppState> {
 				<div style={{ margin: "2em auto", width: pianoWidth }}>
 					{this.renderTopbar()}
 					<SequencePlayer
-						source={this.source}
+						midi={this.midi}
 						events={state.events}
 						render={({
 							playing,
