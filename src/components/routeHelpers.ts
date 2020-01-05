@@ -21,9 +21,7 @@ export function getSongUrl(href: string) {
 export function setSongUrl(song: Array<MidiEvent>) {
 	const parsed = url.parse(location.href, true)
 	delete parsed.search
-	// console.log(toString(song))
 	parsed.query.song = toString(song)
-	console.log("urlSongLength", parsed.query.song.length)
 	const next = url.format(parsed)
 	history.pushState({}, "", next)
 }

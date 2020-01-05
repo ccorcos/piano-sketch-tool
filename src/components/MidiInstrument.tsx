@@ -1,57 +1,8 @@
 import * as React from "react"
-
-const keyMap = {
-	a: 0,
-	w: 1,
-	s: 2,
-	e: 3,
-	d: 4,
-	f: 5,
-	t: 6,
-	g: 7,
-	y: 8,
-	h: 9,
-	u: 10,
-	j: 11,
-	k: 12,
-	o: 13,
-	l: 14,
-	p: 15,
-	";": 16,
-	"'": 17,
-}
-
-type MidiNodeListener = (on: boolean, midiNote: number) => void
-
-export class MidiEmitter {
-	listeners: Set<MidiNodeListener> = new Set()
-	addListener(fn: MidiNodeListener) {
-		this.listeners.add(fn)
-	}
-	removeListener(fn: MidiNodeListener) {
-		this.listeners.delete(fn)
-	}
-	keys: Set<number> = new Set()
-	emit(keyOn: boolean, midiNote: number) {
-		for (const listener of this.listeners.values()) {
-			listener(keyOn, midiNote)
-		}
-		if (keyOn) {
-			this.keys.add(midiNote)
-		} else {
-			this.keys.delete(midiNote)
-		}
-	}
-	clear() {
-		const keys = Array.from(this.keys.values())
-		for (const key of keys) {
-			this.emit(false, key)
-		}
-	}
-}
+import { MidiEmitter, keyMap } from "./MidiEmitter"
 
 export class ComputerMidiInstrument {
-	constructor(private emitter: MidiEmitter) {}
+	constructor(private midiInstrument: MidiEmitter) {}
 
 	start() {
 		window.addEventListener("keydown", this.handleKeyDown)
@@ -72,7 +23,7 @@ export class ComputerMidiInstrument {
 			const midiNote = keyMap[event.key] + 60
 			if (!this.keys.has(midiNote)) {
 				this.keys.add(midiNote)
-				this.emitter.emit(true, midiNote)
+				this.midiInstrument.emit(true, midiNote)
 			}
 		}
 	}
@@ -84,14 +35,14 @@ export class ComputerMidiInstrument {
 			const midiNote = keyMap[event.key] + 60
 			if (this.keys.has(midiNote)) {
 				this.keys.delete(midiNote)
-				this.emitter.emit(false, midiNote)
+				this.midiInstrument.emit(false, midiNote)
 			}
 		}
 	}
 }
 
 interface MidiSelectorProps {
-	midi: MidiEmitter
+	midiInstrument: MidiEmitter
 }
 
 type MidiInput = {
@@ -114,9 +65,9 @@ export class MidiSelector extends React.PureComponent<
 	}
 
 	keyboard: ComputerMidiInstrument
-	constructor(props) {
+	constructor(props: MidiSelectorProps) {
 		super(props)
-		this.keyboard = new ComputerMidiInstrument(props.midi)
+		this.keyboard = new ComputerMidiInstrument(props.midiInstrument)
 		this.keyboard.start()
 		this.initializeMidi()
 	}
@@ -131,7 +82,7 @@ export class MidiSelector extends React.PureComponent<
 	}
 
 	private setMidiInput(name: string) {
-		this.props.midi.clear()
+		this.props.midiInstrument.clear()
 		if (name === "refresh") {
 			this.initializeMidi()
 			return
@@ -155,14 +106,11 @@ export class MidiSelector extends React.PureComponent<
 
 	private handleMidiMessage = (name: string, msg) => {
 		if (this.state.selector === name) {
-			console.log("midi", name, this.state.selector)
 			const [command, note] = msg.data
 			if (command === 144) {
-				// console.log("T", note)
-				this.props.midi.emit(true, note)
+				this.props.midiInstrument.emit(true, note)
 			} else if (command === 128) {
-				// console.log("F", note)
-				this.props.midi.emit(false, note)
+				this.props.midiInstrument.emit(false, note)
 			}
 		}
 	}

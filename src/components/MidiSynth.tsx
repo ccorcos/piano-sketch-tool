@@ -1,10 +1,10 @@
 import * as React from "react"
 import * as Tone from "tone"
 import * as _ from "lodash"
-import { MidiEmitter } from "./MidiInstrument"
+import { MidiEmitter } from "./MidiEmitter"
 
 interface MidiSoundProps {
-	midi: MidiEmitter
+	midiInstrument: MidiEmitter
 }
 
 interface MidiSoundState {
@@ -29,11 +29,11 @@ export class MidiSynth extends React.PureComponent<
 	private handleToggleSound = e => {
 		if (this.state.on) {
 			this.setState({ on: false })
-			this.props.midi.removeListener(this.handleMidiNote)
+			this.props.midiInstrument.removeListener(this.handleMidiNote)
 		} else {
 			this.setState({ on: true })
 			this.startTone()
-			this.props.midi.addListener(this.handleMidiNote)
+			this.props.midiInstrument.addListener(this.handleMidiNote)
 		}
 	}
 

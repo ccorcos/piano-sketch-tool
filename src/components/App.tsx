@@ -1,7 +1,8 @@
 import * as React from "react"
 import { Piano } from "./Piano"
 import { pianoWidth } from "./helpers"
-import { MidiEmitter, MidiSelector } from "./MidiInstrument"
+import { MidiSelector } from "./MidiInstrument"
+import { MidiEmitter } from "./MidiEmitter"
 import { SequenceRecorder, MidiEvent, SequencePlayer } from "./Sequencer"
 import { clearSongUrl, getSongUrl } from "./routeHelpers"
 import { KeyboardShorcuts } from "./KeyboardShorcuts"
@@ -22,7 +23,7 @@ type AppState =
 
 export class App extends React.PureComponent<{}, AppState> {
 	state: AppState = { type: "recording" as const, keys: new Set<number>() }
-	midi = new MidiEmitter()
+	midiInstrument = new MidiEmitter()
 
 	constructor(props) {
 		super(props)
@@ -37,11 +38,11 @@ export class App extends React.PureComponent<{}, AppState> {
 	}
 
 	componentWillMount() {
-		this.midi.addListener(this.handleMidiNote)
+		this.midiInstrument.addListener(this.handleMidiNote)
 	}
 
 	componentWillUnmount() {
-		this.midi.removeListener(this.handleMidiNote)
+		this.midiInstrument.removeListener(this.handleMidiNote)
 	}
 
 	renderTopbar() {
@@ -55,8 +56,8 @@ export class App extends React.PureComponent<{}, AppState> {
 				{/* <button style={{ marginRight: 4 }}>Open Sketch (O)</button> */}
 
 				<div style={{ fontSize: 14, float: "right", display: "flex" }}>
-					<MidiSelector midi={this.midi} />
-					<MidiSynth midi={this.midi} />
+					<MidiSelector midiInstrument={this.midiInstrument} />
+					<MidiSynth midiInstrument={this.midiInstrument} />
 				</div>
 
 				<a
@@ -93,7 +94,7 @@ export class App extends React.PureComponent<{}, AppState> {
 		if (state.type === "recording") {
 			return (
 				<SequenceRecorder
-					midi={this.midi}
+					midiInstrument={this.midiInstrument}
 					render={({ recording, start, stop, sequencer }) => {
 						const handleStop = () => {
 							const events = stop()
@@ -163,7 +164,7 @@ export class App extends React.PureComponent<{}, AppState> {
 		} else {
 			return (
 				<SequencePlayer
-					midi={this.midi}
+					midiInstrument={this.midiInstrument}
 					events={state.events}
 					render={({
 						playing,
