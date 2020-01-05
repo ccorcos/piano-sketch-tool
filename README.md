@@ -10,20 +10,15 @@ The goal of this project is to create a tool for recording, learning, and sharin
 - Features
 	- wait mode -- wait for you to play all the notes before continuing.
 	- empty recording should not redirect to player
-
 	- history forward/back navigation
-
 	- ui stuff
 		- time elapsed
 		- title
 		- date of recording
 		- indication if you hit the right note at the right time.
-
 	- save notes to a file
 	- load a file with notes
-
 	- select and loop a section
-
 
 ## Designs
 
