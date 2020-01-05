@@ -18,6 +18,7 @@ const config: Configuration = {
 					},
 				],
 			},
+			{ test: /\.png$/, loader: "file-loader" },
 		],
 	},
 	cache: true,
@@ -26,10 +27,12 @@ const config: Configuration = {
 		path: path.join(__dirname, "dist"),
 		filename: "[name]-[chunkhash].js",
 		chunkFilename: "[name]-[chunkhash].js",
+		publicPath: "",
 	},
 	plugins: [
 		new HtmlWebpackPlugin({
 			template: path.join(__dirname, "src/index.html"),
+			favicon: path.join(__dirname, "src/piano.png"),
 		}),
 	],
 }
