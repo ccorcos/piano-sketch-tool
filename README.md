@@ -2,7 +2,7 @@
 
 The goal of this project is to create a tool for recording, learning, and sharing piano songs.
 
-- [Check out the Live Demo](https://ccorcos.github.io/piano-sketch-tool)
+- [Check out the Live Demo](https://www.pianosketch.com/)
 - [Check out the Gallery](https://github.com/ccorcos/piano-sketch-tool/blob/master/GALLERY.md)
 
 ## To-Do
