@@ -4,7 +4,6 @@
 	"description": "boilerplate for web applications using typescript and webpack",
 	"main": "index.js",
 	"scripts": {
-		"preinstall": "test $NOW_BUILDER && yum install alsa-lib-devel",
 		"start": "webpack-dev-server --content-base public",
 		"build": "webpack -p"
 	},
@@ -14,7 +13,6 @@
 	"dependencies": {
 		"glamor": "^2.20.40",
 		"lodash": "^4.17.15",
-		"midi": "^1.0.0",
 		"pako": "^1.0.10",
 		"react": "^16.12.0",
 		"react-dom": "^16.12.0",
