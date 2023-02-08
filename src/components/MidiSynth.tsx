@@ -1,6 +1,6 @@
+import * as _ from "lodash"
 import * as React from "react"
 import * as Tone from "tone"
-import * as _ from "lodash"
 import { MidiEmitter } from "./MidiEmitter"
 
 interface MidiSoundProps {
@@ -29,7 +29,7 @@ export class MidiSynth extends React.PureComponent<
 
 	synth: any
 
-	private handleToggleSound = e => {
+	private handleToggleSound = (e) => {
 		if (this.state.on) {
 			this.setState({ on: false })
 			this.props.midi.clear()
@@ -55,7 +55,7 @@ export class MidiSynth extends React.PureComponent<
 		return (
 			<div style={{ marginLeft: 8 }}>
 				<span>{this.props.label}</span>
-				<button style={{ width: 60 }} onClick={this.handleToggleSound}>
+				<button style={{ width: 80 }} onClick={this.handleToggleSound}>
 					{this.state.on ? "Turn Off" : "Turn On"}
 				</button>
 			</div>
